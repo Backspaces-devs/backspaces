@@ -27,7 +27,7 @@ export default function About() {
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <div className="flex flex-col items-start justify-center w-full gap-6">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            About <ContainerTextFlip words={["BACKSPACES","Mordern"]} textClassName="text-4xl sm:text-5xl font-bold"/>
+            About BackSpaces
           </h1>
 
           <p className="text-lg text-zinc-600 dark:text-zinc-300 leading-relaxed">
