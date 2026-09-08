@@ -2,7 +2,7 @@ import { ContainerTextFlip } from "@/components/ui/ContainerTextFlip";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Backspaces | A Dev Space for Builders and Learners",
+  title: "About Backspaces",
   description:
     "Backspaces is a dev space built for students and developers eager to code — a place to connect, solve real problems, share what you're building, and grow together.",
   keywords: [
