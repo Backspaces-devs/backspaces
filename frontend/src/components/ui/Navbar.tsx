@@ -48,14 +48,14 @@ export function Navbar() {
   }, [isOpen]);
 
   const logoElement = (
-  <div className="w-8 h-8 rounded-full overflow-hidden border-0 border-gray-300">
-    <img
-      src="/logo.svg"
-      alt="Logo"
-      className="w-full h-full object-cover"
-    />
-  </div>
-);
+    <div className="w-8 h-8 rounded-full overflow-hidden border-0 border-gray-300">
+      <img
+        src="/logo.svg"
+        alt="Logo"
+        className="w-full h-full object-cover rounded-full border-2 border-blue-500"
+      />
+    </div>
+  );
 
   const navLinksData = [
     { label: 'Home', href: '/' },
@@ -71,9 +71,9 @@ export function Navbar() {
 
   const signupButtonElement = (
     <div className="relative group w-full sm:w-auto">
-       <button className="relative z-10 px-4 py-2 sm:px-3 text-xs sm:text-sm font-semibold text-black bg-gradient-to-br from-gray-100 to-gray-300 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-200 w-full sm:w-auto">
-         Signup
-       </button>
+      <button className="relative z-10 px-4 py-2 sm:px-3 text-xs sm:text-sm font-semibold text-black bg-gradient-to-br from-gray-100 to-gray-300 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-200 w-full sm:w-auto">
+        Signup
+      </button>
     </div>
   );
 
@@ -87,9 +87,11 @@ export function Navbar() {
                        transition-[border-radius] duration-0 ease-in-out`}>
 
       <div className="flex items-center justify-between w-full gap-x-6 sm:gap-x-8">
-        <div className="flex items-center">
-           {logoElement}
-        </div>
+        <a href="/">
+          <div className="flex items-center ">
+            {logoElement}
+          </div>
+        </a>
         <span className="sm:hidden text-white font-semibold text-base">BACKSPACES</span>
         <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm">
           {navLinksData.map((link) => (
@@ -106,9 +108,9 @@ export function Navbar() {
 
         <button className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none" onClick={toggleMenu} aria-label={isOpen ? 'Close Menu' : 'Open Menu'}>
           {isOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           )}
         </button>
       </div>
