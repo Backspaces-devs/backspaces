@@ -1,23 +1,41 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
+// app/terms/page.jsx
+//
+// Drop this file into: app/terms/page.jsx (Next.js App Router)
+// Requires Tailwind's dark mode set to "class" in tailwind.config.js:
+//   module.exports = { darkMode: "class", ... }
+//
+// Matches the layout/format of the privacy-policy route: sticky sidebar
+// table of contents, stone/neutral palette, light + dark mode support.
 
-export const metadata: Metadata = {
-  title: 'Terms and Conditions | Backspaces',
-  description: 'Read the Terms and Conditions for Backspaces. Last updated September 10, 2026.',
+const COMPANY_NAME = "Backspaces";
+const SITE_URL = "https://www.backspaces.com";
+const CONTACT_EMAIL = "backspaces.devs@gmail.com";
+const MAILING_ADDRESS_LINES = [
+  "Ambedkar Nagar, Greater Noida",
+  "Greater Noida, Uttar Pradesh 201310",
+  "India",
+];
+const LAST_UPDATED = "September 10, 2026";
+
+// ---- SEO metadata (Next.js App Router convention) ----
+export const metadata = {
+  title: `Terms and Conditions | ${COMPANY_NAME}`,
+  description: `Read the Terms and Conditions for ${COMPANY_NAME}. Last updated ${LAST_UPDATED}.`,
   alternates: {
-    canonical: 'https://www.backspaces.com/terms',
+    canonical: `${SITE_URL}/terms`,
   },
   openGraph: {
-    title: 'Terms and Conditions | Backspaces',
-    description: 'Read the Terms and Conditions for Backspaces.',
-    url: 'https://www.backspaces.com/terms',
-    siteName: 'Backspaces',
-    locale: 'en_IN',
-    type: 'website',
+    title: `Terms and Conditions | ${COMPANY_NAME}`,
+    description: `Read the Terms and Conditions for ${COMPANY_NAME}.`,
+    url: `${SITE_URL}/terms`,
+    siteName: COMPANY_NAME,
+    locale: "en_IN",
+    type: "website",
   },
   twitter: {
-    card: 'summary',
-    title: 'Terms and Conditions | Backspaces',
+    card: "summary",
+    title: `Terms and Conditions | ${COMPANY_NAME}`,
+    description: `Read the Terms and Conditions for ${COMPANY_NAME}.`,
   },
   robots: {
     index: true,
@@ -25,1350 +43,1179 @@ export const metadata: Metadata = {
   },
 };
 
+const sections = [
+  { id: "services", label: "1. Our Services" },
+  { id: "ip", label: "2. Intellectual Property Rights" },
+  { id: "userreps", label: "3. User Representations" },
+  { id: "userreg", label: "4. User Registration" },
+  { id: "purchases", label: "5. Purchases and Payment" },
+  { id: "prohibited", label: "6. Prohibited Activities" },
+  { id: "ugc", label: "7. User Generated Contributions" },
+  { id: "license", label: "8. Contribution License" },
+  { id: "reviews", label: "9. Guidelines for Reviews" },
+  { id: "socialmedia", label: "10. Social Media" },
+  { id: "thirdparty", label: "11. Third-Party Websites and Content" },
+  { id: "sitemanage", label: "12. Services Management" },
+  { id: "ppyes", label: "13. Privacy Policy" },
+  { id: "copyrightno", label: "14. Copyright Infringements" },
+  { id: "terms", label: "15. Term and Termination" },
+  { id: "modifications", label: "16. Modifications and Interruptions" },
+  { id: "law", label: "17. Governing Law" },
+  { id: "disputes", label: "18. Dispute Resolution" },
+  { id: "corrections", label: "19. Corrections" },
+  { id: "disclaimer", label: "20. Disclaimer" },
+  { id: "liability", label: "21. Limitations of Liability" },
+  { id: "indemnification", label: "22. Indemnification" },
+  { id: "userdata", label: "23. User Data" },
+  { id: "electronic", label: "24. Electronic Communications, Transactions, and Signatures" },
+  { id: "sms", label: "25. SMS Text Messaging" },
+  { id: "misc", label: "26. Miscellaneous" },
+  { id: "contact", label: "27. Contact Us" },
+];
+
+function jsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: `Terms and Conditions | ${COMPANY_NAME}`,
+    description: `${COMPANY_NAME}'s Terms and Conditions governing use of the Services.`,
+    url: `${SITE_URL}/terms`,
+    dateModified: LAST_UPDATED,
+    publisher: {
+      "@type": "Organization",
+      name: COMPANY_NAME,
+    },
+  };
+}
+
 export default function TermsAndConditionsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16 text-slate-700">
-      <header className="mb-12">
-        <h1 className="mb-4 text-4xl font-extrabold text-slate-900 tracking-tight">
-          TERMS AND CONDITIONS
-        </h1>
-        <p className="text-sm font-medium text-slate-500">
-          Last updated September 10, 2026
-        </p>
-      </header>
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()) }}
+      />
 
-      <section className="mb-12">
-        <h2 className="mb-4 text-2xl font-bold text-slate-900">
-          AGREEMENT TO OUR LEGAL TERMS
-        </h2>
-        <div className="space-y-4 leading-relaxed">
-          <p>
-            We are <span className="notranslate font-semibold">Backspaces</span> (
-            <strong>&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;</strong>
-            ), a company registered in <span className="notranslate">India</span> at{' '}
-            <span className="notranslate">Ambedkar nagar Greater Noida</span>,{' '}
-            <span className="notranslate">Greater Noida</span>,{' '}
-            <span className="notranslate">UTTAR PRADESH</span>{' '}
-            <span className="notranslate">201310</span>.
-          </p>
-          <p>
-            We operate the website{' '}
-            <a
-              href="https://www.backspaces.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline break-words"
-            >
-              https://www.backspaces.com
-            </a>{' '}
-            (the <strong>&quot;Site&quot;</strong>), as well as any other related
-            products and services that refer or link to these legal terms (the{' '}
-            <strong>&quot;Legal Terms&quot;</strong>) (collectively, the{' '}
-            <strong>&quot;Services&quot;</strong>).
-          </p>
-          <p>
-            You can contact us by email at{' '}
-            <a
-              href="mailto:backspaces.devs@gmail.com"
-              className="text-blue-600 hover:underline"
-            >
-              backspaces.devs@gmail.com
-            </a>{' '}
-            or by mail to <span className="notranslate">Ambedkar nagar Greater Noida</span>,{' '}
-            <span className="notranslate">Greater Noida</span>,{' '}
-            <span className="notranslate">UTTAR PRADESH</span>,{' '}
-            <span className="notranslate">201310</span>, <span className="notranslate">India</span>.
-          </p>
-          <p>
-            These Legal Terms constitute a legally binding agreement made between you,
-            whether personally or on behalf of an entity (<strong>&quot;you&quot;</strong>
-            ), and <span className="notranslate font-semibold">Backspaces</span>,
-            concerning your access to and use of the Services. You agree that by
-            accessing the Services, you have read, understood, and agreed to be bound by
-            all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS,
-            THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST
-            DISCONTINUE USE IMMEDIATELY.
-          </p>
-          <p>
-            We will provide you with prior notice of any scheduled changes to the Services
-            you are using. The modified Legal Terms will become effective upon posting or
-            notifying you by{' '}
-            <a
-              href="mailto:Backspaces.devs@gmail.com"
-              className="text-blue-600 hover:underline"
-            >
-              Backspaces.devs@gmail.com
-            </a>
-            , as stated in the email message. By continuing to use the Services after the
-            effective date of any changes, you agree to be bound by the modified terms.
-          </p>
-          <p>
-            The Services are intended for users who are at least 18 years old. Persons
-            under the age of 18 are not permitted to use or register for the Services.
-          </p>
-          <p>We recommend that you print a copy of these Legal Terms for your records.</p>
+      <div className="min-h-screen bg-stone-50 text-stone-800 dark:bg-neutral-950 dark:text-stone-200">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-14 md:grid-cols-[260px_1fr] md:px-10">
+          {/* Sidebar / table of contents */}
+          <nav
+            aria-label="Table of contents"
+            className="order-2 h-max md:sticky md:top-14 md:order-1"
+          >
+            <p className="mb-3 text-sm font-medium text-stone-500 dark:text-stone-400">
+              On this page
+            </p>
+            <ul className="max-h-[75vh] space-y-2 overflow-y-auto border-l border-stone-200 pl-4 text-sm dark:border-neutral-800">
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className="text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Main content */}
+          <main className="order-1 min-w-0 md:order-2">
+            <header className="mb-10 border-b border-stone-200 pb-8 dark:border-neutral-800">
+              <h1 className="text-3xl font-semibold tracking-tight text-stone-900 dark:text-stone-50 sm:text-4xl">
+                Terms and Conditions
+              </h1>
+              <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
+                Last updated: {LAST_UPDATED}
+              </p>
+            </header>
+
+            <div className="max-w-none space-y-10 leading-relaxed">
+              <section aria-labelledby="agreement-h">
+                <h2 id="agreement-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  Agreement to our legal terms
+                </h2>
+                <div className="mt-4 space-y-4">
+                  <p>
+                    We are <span className="font-semibold">{COMPANY_NAME}</span>{" "}
+                    (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo;
+                    &ldquo;our&rdquo;), a company registered in India at{" "}
+                    {MAILING_ADDRESS_LINES.join(", ")}.
+                  </p>
+                  <p>
+                    We operate the website{" "}
+                    <a
+                      href={SITE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="break-words underline underline-offset-2"
+                    >
+                      {SITE_URL}
+                    </a>{" "}
+                    (the &ldquo;Site&rdquo;), as well as any other related
+                    products and services that refer or link to these legal
+                    terms (the &ldquo;Legal Terms&rdquo;) (collectively, the
+                    &ldquo;Services&rdquo;).
+                  </p>
+                  <p>
+                    You can contact us by email at{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                      {CONTACT_EMAIL}
+                    </a>{" "}
+                    or by mail to {MAILING_ADDRESS_LINES.join(", ")}.
+                  </p>
+                  <p>
+                    These Legal Terms constitute a legally binding agreement
+                    made between you, whether personally or on behalf of an
+                    entity (&ldquo;you&rdquo;), and{" "}
+                    <span className="font-semibold">{COMPANY_NAME}</span>,
+                    concerning your access to and use of the Services. You
+                    agree that by accessing the Services, you have read,
+                    understood, and agreed to be bound by all of these Legal
+                    Terms.{" "}
+                    <strong>
+                      If you do not agree with all of these Legal Terms, then
+                      you are expressly prohibited from using the Services and
+                      you must discontinue use immediately.
+                    </strong>
+                  </p>
+                  <p>
+                    We will provide you with prior notice of any scheduled
+                    changes to the Services you are using. The modified Legal
+                    Terms will become effective upon posting or notifying you
+                    by{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                      {CONTACT_EMAIL}
+                    </a>
+                    , as stated in the email message. By continuing to use the
+                    Services after the effective date of any changes, you
+                    agree to be bound by the modified terms.
+                  </p>
+                  <p>
+                    The Services are intended for users who are at least 18
+                    years old. Persons under the age of 18 are not permitted
+                    to use or register for the Services.
+                  </p>
+                  <p>
+                    We recommend that you print a copy of these Legal Terms
+                    for your records.
+                  </p>
+                </div>
+              </section>
+
+              <section id="services" className="scroll-mt-20" aria-labelledby="services-h">
+                <h2 id="services-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  1. Our Services
+                </h2>
+                <p className="mt-3">
+                  The information provided when using the Services is not
+                  intended for distribution to or use by any person or entity
+                  in any jurisdiction or country where such distribution or
+                  use would be contrary to law or regulation, or which would
+                  subject us to any registration requirement within such
+                  jurisdiction or country. Accordingly, those who choose to
+                  access the Services from other locations do so on their own
+                  initiative and are solely responsible for compliance with
+                  local laws, if and to the extent local laws are applicable.
+                </p>
+              </section>
+
+              <section id="ip" className="scroll-mt-20" aria-labelledby="ip-h">
+                <h2 id="ip-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  2. Intellectual property rights
+                </h2>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Our intellectual property
+                </h3>
+                <div className="mt-2 space-y-3">
+                  <p>
+                    We are the owner or the licensee of all intellectual
+                    property rights in our Services, including all source
+                    code, databases, functionality, software, website
+                    designs, audio, video, text, photographs, and graphics in
+                    the Services (collectively, the &ldquo;Content&rdquo;), as
+                    well as the trademarks, service marks, and logos contained
+                    therein (the &ldquo;Marks&rdquo;).
+                  </p>
+                  <p>
+                    Our Content and Marks are protected by copyright and
+                    trademark laws (and various other intellectual property
+                    rights and unfair competition laws) and treaties around
+                    the world.
+                  </p>
+                  <p>
+                    The Content and Marks are provided in or through the
+                    Services &ldquo;as is&rdquo; for your personal,
+                    non-commercial use only.
+                  </p>
+                </div>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Your use of our Services
+                </h3>
+                <div className="mt-2 space-y-3">
+                  <p>
+                    Subject to your compliance with these Legal Terms,
+                    including the{" "}
+                    <a href="#prohibited" className="underline underline-offset-2">
+                      Prohibited Activities
+                    </a>{" "}
+                    section below, we grant you a non-exclusive,
+                    non-transferable, revocable license to:
+                  </p>
+                  <ul className="list-disc space-y-1 pl-6">
+                    <li>access the Services; and</li>
+                    <li>
+                      download or print a copy of any portion of the Content
+                      to which you have properly gained access,
+                    </li>
+                  </ul>
+                  <p>solely for your personal, non-commercial use.</p>
+                  <p>
+                    Except as set out in this section or elsewhere in our
+                    Legal Terms, no part of the Services and no Content or
+                    Marks may be copied, reproduced, aggregated, republished,
+                    uploaded, posted, publicly displayed, encoded, translated,
+                    transmitted, distributed, sold, licensed, or otherwise
+                    exploited for any commercial purpose whatsoever, without
+                    our express prior written permission.
+                  </p>
+                  <p>
+                    If you wish to make any use of the Services, Content, or
+                    Marks other than as set out in this section, please
+                    address your request to{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                      {CONTACT_EMAIL}
+                    </a>
+                    . If we ever grant you permission to post, reproduce, or
+                    publicly display any part of our Services or Content, you
+                    must identify us as the owners or licensors of the
+                    Services, Content, or Marks and ensure that any copyright
+                    or proprietary notice appears or is visible on posting,
+                    reproducing, or displaying our Content.
+                  </p>
+                  <p>
+                    We reserve all rights not expressly granted to you in and
+                    to the Services, Content, and Marks.
+                  </p>
+                  <p>
+                    Any breach of these Intellectual Property Rights will
+                    constitute a material breach of our Legal Terms and your
+                    right to use our Services will terminate immediately.
+                  </p>
+                </div>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Your submissions and contributions
+                </h3>
+                <div className="mt-2 space-y-3">
+                  <p>
+                    Please review this section and the{" "}
+                    <a href="#prohibited" className="underline underline-offset-2">
+                      Prohibited Activities
+                    </a>{" "}
+                    section carefully prior to using our Services to
+                    understand (a) the rights you give us and (b) the
+                    obligations you have when you post or upload content
+                    through the Services.
+                  </p>
+                  <p>
+                    <strong>Submissions:</strong> By directly sending us any
+                    question, comment, suggestion, idea, feedback, or other
+                    information about the Services (&ldquo;Submissions&rdquo;),
+                    you agree to assign to us all intellectual property rights
+                    in such Submission. You agree that we shall own this
+                    Submission and be entitled to its unrestricted use and
+                    dissemination for any lawful purpose, commercial or
+                    otherwise, without acknowledgment or compensation to you.
+                  </p>
+                  <p>
+                    <strong>Contributions:</strong> The Services may invite
+                    you to chat, contribute to, or participate in blogs,
+                    message boards, online forums, and other functionality
+                    during which you may create, submit, post, display,
+                    transmit, publish, distribute, or broadcast content and
+                    materials to us or through the Services (&ldquo;Contributions&rdquo;).
+                    Any Submission that is publicly posted shall also be
+                    treated as a Contribution.
+                  </p>
+                  <p>
+                    You understand that Contributions may be viewable by other
+                    users of the Services and possibly through third-party
+                    websites.
+                  </p>
+                  <p>
+                    <strong>
+                      When you post Contributions, you grant us a license
+                      (including use of your name, trademarks, and logos):
+                    </strong>{" "}
+                    by posting any Contributions, you grant us an
+                    unrestricted, unlimited, irrevocable, perpetual,
+                    non-exclusive, transferable, royalty-free, fully-paid,
+                    worldwide right and license to use, copy, reproduce,
+                    distribute, sell, resell, publish, broadcast, retitle,
+                    store, publicly perform, publicly display, reformat,
+                    translate, excerpt, and exploit your Contributions
+                    (including your image, name, and voice) for any purpose,
+                    commercial, advertising, or otherwise, to prepare
+                    derivative works of, or incorporate into other works, your
+                    Contributions, and to sublicense the licenses granted in
+                    this section. Our use and distribution may occur in any
+                    media formats and through any media channels.
+                  </p>
+                  <p>
+                    This license includes our use of your name, company name,
+                    and franchise name, as applicable, and any trademarks,
+                    service marks, trade names, logos, and personal and
+                    commercial images you provide.
+                  </p>
+                  <p>
+                    <strong>You are responsible for what you post or upload:</strong>{" "}
+                    by sending us Submissions and/or posting Contributions
+                    through the Services, you:
+                  </p>
+                  <ul className="list-disc space-y-1 pl-6">
+                    <li>
+                      confirm that you have read and agree with our{" "}
+                      <a href="#prohibited" className="underline underline-offset-2">
+                        Prohibited Activities
+                      </a>{" "}
+                      and will not post any Submission or Contribution that is
+                      illegal, harassing, hateful, harmful, defamatory,
+                      obscene, bullying, abusive, discriminatory, threatening
+                      to any person or group, sexually explicit, false,
+                      inaccurate, deceitful, or misleading;
+                    </li>
+                    <li>
+                      to the extent permissible by applicable law, waive any
+                      and all moral rights to any such Submission and/or
+                      Contribution;
+                    </li>
+                    <li>
+                      warrant that any such Submission and/or Contributions
+                      are original to you or that you have the necessary
+                      rights and licenses to submit them, and that you have
+                      full authority to grant us the rights described above;
+                      and
+                    </li>
+                    <li>
+                      warrant and represent that your Submissions and/or
+                      Contributions do not constitute confidential
+                      information.
+                    </li>
+                  </ul>
+                  <p>
+                    You are solely responsible for your Submissions and/or
+                    Contributions and expressly agree to reimburse us for any
+                    losses we may suffer because of your breach of (a) this
+                    section, (b) any third party&rsquo;s intellectual property
+                    rights, or (c) applicable law.
+                  </p>
+                  <p>
+                    <strong>We may remove or edit your Content:</strong>{" "}
+                    although we have no obligation to monitor Contributions,
+                    we may remove or edit any Contributions at any time
+                    without notice if, in our reasonable opinion, we consider
+                    them harmful or in breach of these Legal Terms. We may
+                    also suspend or disable your account and report you to
+                    the authorities.
+                  </p>
+                </div>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Copyright infringement
+                </h3>
+                <p className="mt-2">
+                  We respect the intellectual property rights of others. If
+                  you believe that any material available on or through the
+                  Services infringes upon any copyright you own or control,
+                  please immediately refer to the{" "}
+                  <a href="#copyrightno" className="underline underline-offset-2">
+                    Copyright Infringements
+                  </a>{" "}
+                  section below.
+                </p>
+              </section>
+
+              <section id="userreps" className="scroll-mt-20" aria-labelledby="userreps-h">
+                <h2 id="userreps-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  3. User representations
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    By using the Services, you represent and warrant that:
+                    (1) all registration information you submit will be true,
+                    accurate, current, and complete; (2) you will maintain the
+                    accuracy of such information and promptly update it as
+                    necessary; (3) you have the legal capacity and agree to
+                    comply with these Legal Terms; (4) you are not a minor in
+                    the jurisdiction in which you reside; (5) you will not
+                    access the Services through automated or non-human means,
+                    whether through a bot, script, or otherwise; (6) you will
+                    not use the Services for any illegal or unauthorized
+                    purpose; and (7) your use of the Services will not violate
+                    any applicable law or regulation.
+                  </p>
+                  <p>
+                    If you provide any information that is untrue, inaccurate,
+                    not current, or incomplete, we have the right to suspend
+                    or terminate your account and refuse any current or
+                    future use of the Services.
+                  </p>
+                </div>
+              </section>
+
+              <section id="userreg" className="scroll-mt-20" aria-labelledby="userreg-h">
+                <h2 id="userreg-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  4. User registration
+                </h2>
+                <p className="mt-3">
+                  You may be required to register to use the Services. You
+                  agree to keep your password confidential and will be
+                  responsible for all use of your account and password. We
+                  reserve the right to remove, reclaim, or change a username
+                  you select if we determine, in our sole discretion, that
+                  such username is inappropriate, obscene, or otherwise
+                  objectionable.
+                </p>
+              </section>
+
+              <section id="purchases" className="scroll-mt-20" aria-labelledby="purchases-h">
+                <h2 id="purchases-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  5. Purchases and payment
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>We accept the following forms of payment:</p>
+                  <ul className="list-disc space-y-1 pl-6">
+                    <li>Visa</li>
+                    <li>Mastercard</li>
+                  </ul>
+                  <p>
+                    You agree to provide current, complete, and accurate
+                    purchase and account information for all purchases made
+                    via the Services, and to promptly update your account and
+                    payment information as needed. Sales tax will be added to
+                    the price of purchases as deemed required by us. We may
+                    change prices at any time. All payments shall be in INR.
+                  </p>
+                  <p>
+                    You agree to pay all charges at the prices then in effect
+                    for your purchases and any applicable shipping fees, and
+                    you authorize us to charge your chosen payment provider
+                    for any such amounts upon placing your order. We reserve
+                    the right to correct any errors or mistakes in pricing,
+                    even if we have already requested or received payment.
+                  </p>
+                  <p>
+                    We reserve the right to refuse any order placed through
+                    the Services, and may limit or cancel quantities purchased
+                    per person, household, or order, including orders that
+                    use the same account, payment method, or billing/shipping
+                    address. We reserve the right to limit or prohibit orders
+                    that, in our sole judgment, appear to be placed by
+                    dealers, resellers, or distributors.
+                  </p>
+                </div>
+              </section>
+
+              <section id="prohibited" className="scroll-mt-20" aria-labelledby="prohibited-h">
+                <h2 id="prohibited-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  6. Prohibited activities
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    You may not access or use the Services for any purpose
+                    other than that for which we make them available. The
+                    Services may not be used in connection with any
+                    commercial endeavors except those specifically endorsed
+                    or approved by us.
+                  </p>
+                  <p>As a user of the Services, you agree not to:</p>
+                  <ul className="list-disc space-y-1.5 pl-6">
+                    <li>
+                      Systematically retrieve data or other content from the
+                      Services to create or compile a collection, database, or
+                      directory without written permission from us.
+                    </li>
+                    <li>
+                      Trick, defraud, or mislead us and other users,
+                      especially in an attempt to learn sensitive account
+                      information such as passwords.
+                    </li>
+                    <li>
+                      Circumvent, disable, or otherwise interfere with
+                      security-related features of the Services.
+                    </li>
+                    <li>
+                      Disparage, tarnish, or otherwise harm, in our opinion,
+                      us and/or the Services.
+                    </li>
+                    <li>
+                      Use any information obtained from the Services to
+                      harass, abuse, or harm another person.
+                    </li>
+                    <li>
+                      Make improper use of our support services or submit
+                      false reports of abuse or misconduct.
+                    </li>
+                    <li>
+                      Use the Services in a manner inconsistent with any
+                      applicable laws or regulations.
+                    </li>
+                    <li>Engage in unauthorized framing of or linking to the Services.</li>
+                    <li>
+                      Upload or transmit viruses, Trojan horses, or other
+                      material, including excessive use of capital letters and
+                      spamming, that interferes with any party&rsquo;s
+                      uninterrupted use of the Services.
+                    </li>
+                    <li>
+                      Engage in any automated use of the system, such as using
+                      scripts to send comments or messages, or using data
+                      mining, robots, or similar data gathering tools.
+                    </li>
+                    <li>Delete the copyright or other proprietary rights notice from any Content.</li>
+                    <li>Attempt to impersonate another user or person or use the username of another user.</li>
+                    <li>
+                      Upload or transmit any material that acts as a passive
+                      or active information collection or transmission
+                      mechanism, such as web bugs, cookies, or similar
+                      devices.
+                    </li>
+                    <li>Interfere with, disrupt, or create an undue burden on the Services or connected networks.</li>
+                    <li>Harass, annoy, intimidate, or threaten any of our employees or agents.</li>
+                    <li>Attempt to bypass any measures designed to prevent or restrict access to the Services.</li>
+                    <li>Copy or adapt the Services&rsquo; software, including HTML, JavaScript, or other code.</li>
+                    <li>
+                      Except as permitted by applicable law, decipher,
+                      decompile, disassemble, or reverse engineer any software
+                      comprising the Services.
+                    </li>
+                    <li>
+                      Use, launch, develop, or distribute any automated
+                      system, including any spider, robot, scraper, or offline
+                      reader that accesses the Services.
+                    </li>
+                    <li>Use a buying or purchasing agent to make purchases on the Services.</li>
+                    <li>
+                      Make any unauthorized use of the Services, including
+                      collecting usernames and/or emails for unsolicited
+                      email, or creating accounts by automated means or false
+                      pretenses.
+                    </li>
+                    <li>
+                      Use the Services to compete with us or for any
+                      revenue-generating endeavor or commercial enterprise
+                      not endorsed by us.
+                    </li>
+                    <li>Use the Services to advertise or offer to sell goods and services.</li>
+                  </ul>
+                </div>
+              </section>
+
+              <section id="ugc" className="scroll-mt-20" aria-labelledby="ugc-h">
+                <h2 id="ugc-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  7. User generated contributions
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    The Services may invite you to chat, contribute to, or
+                    participate in blogs, message boards, online forums, and
+                    other functionality, and provide you the opportunity to
+                    create, submit, post, display, transmit, perform,
+                    publish, distribute, or broadcast content and materials
+                    (&ldquo;Contributions&rdquo;). Contributions may be
+                    viewable by other users and through third-party websites,
+                    and may be treated as non-confidential and
+                    non-proprietary. When you create or make available any
+                    Contributions, you represent and warrant that:
+                  </p>
+                  <ul className="list-disc space-y-1.5 pl-6">
+                    <li>
+                      The creation, distribution, transmission, public
+                      display, or performance, and the accessing, downloading,
+                      or copying of your Contributions do not and will not
+                      infringe the proprietary rights of any third party.
+                    </li>
+                    <li>
+                      You are the creator and owner of, or have the necessary
+                      licenses and rights to use and authorize us and other
+                      users to use, your Contributions.
+                    </li>
+                    <li>
+                      You have the consent of every identifiable person in
+                      your Contributions to use their name or likeness as
+                      contemplated by the Services and these Legal Terms.
+                    </li>
+                    <li>Your Contributions are not false, inaccurate, or misleading.</li>
+                    <li>
+                      Your Contributions are not unsolicited or unauthorized
+                      advertising, promotional material, pyramid schemes,
+                      chain letters, spam, or mass mailings.
+                    </li>
+                    <li>
+                      Your Contributions are not obscene, lewd, violent,
+                      harassing, libelous, or otherwise objectionable (as
+                      determined by us).
+                    </li>
+                    <li>Your Contributions do not ridicule, mock, disparage, intimidate, or abuse anyone.</li>
+                    <li>
+                      Your Contributions are not used to harass or threaten
+                      any person or to promote violence against a person or
+                      class of people.
+                    </li>
+                    <li>Your Contributions do not violate any applicable law, regulation, or rule.</li>
+                    <li>Your Contributions do not violate the privacy or publicity rights of any third party.</li>
+                    <li>
+                      Your Contributions do not violate any law concerning
+                      child pornography, or otherwise intended to protect the
+                      health or well-being of minors.
+                    </li>
+                    <li>
+                      Your Contributions do not include offensive comments
+                      connected to race, national origin, gender, sexual
+                      preference, or physical handicap.
+                    </li>
+                    <li>
+                      Your Contributions do not otherwise violate, or link to
+                      material that violates, any provision of these Legal
+                      Terms or applicable law.
+                    </li>
+                  </ul>
+                  <p>
+                    Any use of the Services in violation of the foregoing
+                    violates these Legal Terms and may result in termination
+                    or suspension of your rights to use the Services.
+                  </p>
+                </div>
+              </section>
+
+              <section id="license" className="scroll-mt-20" aria-labelledby="license-h">
+                <h2 id="license-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  8. Contribution license
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    By posting your Contributions to any part of the Services,
+                    you automatically grant us an unrestricted, unlimited,
+                    irrevocable, perpetual, non-exclusive, transferable,
+                    royalty-free, fully-paid, worldwide right and license to
+                    host, use, copy, reproduce, disclose, sell, resell,
+                    publish, broadcast, retitle, archive, store, cache,
+                    publicly perform, publicly display, reformat, translate,
+                    transmit, excerpt, and distribute such Contributions for
+                    any purpose, and to prepare derivative works of, or
+                    incorporate into other works, such Contributions.
+                  </p>
+                  <p>
+                    This license will apply to any form, media, or technology
+                    now known or hereafter developed, and includes our use of
+                    your name, company name, and franchise name, as
+                    applicable. You waive all moral rights in your
+                    Contributions.
+                  </p>
+                  <p>
+                    We do not assert any ownership over your Contributions.
+                    You retain full ownership of all of your Contributions and
+                    any associated intellectual property rights. We are not
+                    liable for any statements or representations in your
+                    Contributions.
+                  </p>
+                  <p>
+                    We have the right, in our sole discretion, to (1) edit,
+                    redact, or otherwise change any Contributions; (2)
+                    re-categorize any Contributions; and (3) pre-screen or
+                    delete any Contributions at any time and for any reason,
+                    without notice.
+                  </p>
+                </div>
+              </section>
+
+              <section id="reviews" className="scroll-mt-20" aria-labelledby="reviews-h">
+                <h2 id="reviews-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  9. Guidelines for reviews
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    We may provide areas on the Services to leave reviews or
+                    ratings. When posting a review, you must comply with the
+                    following criteria: (1) you should have firsthand
+                    experience with the person/entity being reviewed; (2)
+                    your reviews should not contain offensive profanity or
+                    abusive, racist, or hateful language; (3) your reviews
+                    should not contain discriminatory references based on
+                    religion, race, gender, national origin, age, marital
+                    status, sexual orientation, or disability; (4) your
+                    reviews should not reference illegal activity; (5) you
+                    should not be affiliated with competitors if posting
+                    negative reviews; (6) you should not draw conclusions as
+                    to the legality of conduct; (7) you may not post false or
+                    misleading statements; and (8) you may not organize a
+                    campaign encouraging others to post reviews.
+                  </p>
+                  <p>
+                    We may accept, reject, or remove reviews in our sole
+                    discretion, and have no obligation to screen or delete
+                    reviews. Reviews are not endorsed by us and do not
+                    necessarily represent our opinions. By posting a review,
+                    you grant us a perpetual, non-exclusive, worldwide,
+                    royalty-free, fully paid, assignable, and sublicensable
+                    right and license to reproduce, modify, translate,
+                    transmit, display, perform, and/or distribute all content
+                    relating to the review.
+                  </p>
+                </div>
+              </section>
+
+              <section id="socialmedia" className="scroll-mt-20" aria-labelledby="socialmedia-h">
+                <h2 id="socialmedia-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  10. Social media
+                </h2>
+                <p className="mt-3">
+                  As part of the functionality of the Services, you may link
+                  your account with online accounts you have with third-party
+                  service providers (each, a &ldquo;Third-Party Account&rdquo;).
+                  You represent and warrant that you are entitled to disclose
+                  your Third-Party Account login information to us, without
+                  breaching any terms governing your use of that account. By
+                  granting us access, you understand that we may access,
+                  make available, and store content from your Third-Party
+                  Account (&ldquo;Social Network Content&rdquo;) so it is
+                  available through the Services, and may receive additional
+                  information when you link your accounts. Your relationship
+                  with third-party service providers is governed solely by
+                  your agreement with them; we make no effort to review
+                  Social Network Content and are not responsible for it. You
+                  can disable the connection between your account and any
+                  Third-Party Account at any time via account settings or by
+                  contacting us, and we will attempt to delete stored
+                  information obtained through that account, except your
+                  username and profile picture.
+                </p>
+              </section>
+
+              <section id="thirdparty" className="scroll-mt-20" aria-labelledby="thirdparty-h">
+                <h2 id="thirdparty-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  11. Third-party websites and content
+                </h2>
+                <p className="mt-3">
+                  The Services may contain links to other websites
+                  (&ldquo;Third-Party Websites&rdquo;) as well as content
+                  belonging to third parties (&ldquo;Third-Party
+                  Content&rdquo;). Such Third-Party Websites and Content are
+                  not investigated or checked for accuracy by us, and we are
+                  not responsible for them. Inclusion of or linking to any
+                  Third-Party Website or Content does not imply our
+                  endorsement. If you access a Third-Party Website, you do so
+                  at your own risk and these Legal Terms no longer govern. Any
+                  purchases made through Third-Party Websites are solely
+                  between you and that third party, and you agree to hold us
+                  blameless from any harm or loss relating to such purchases
+                  or Third-Party Content.
+                </p>
+              </section>
+
+              <section id="sitemanage" className="scroll-mt-20" aria-labelledby="sitemanage-h">
+                <h2 id="sitemanage-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  12. Services management
+                </h2>
+                <p className="mt-3">
+                  We reserve the right, but not the obligation, to: (1)
+                  monitor the Services for violations of these Legal Terms;
+                  (2) take appropriate legal action against anyone who
+                  violates the law or these Legal Terms; (3) refuse, restrict,
+                  limit, or disable any of your Contributions; (4) remove or
+                  disable files and content that are excessive in size or
+                  burdensome to our systems; and (5) otherwise manage the
+                  Services to protect our rights and property and facilitate
+                  their proper functioning.
+                </p>
+              </section>
+
+              <section id="ppyes" className="scroll-mt-20" aria-labelledby="ppyes-h">
+                <h2 id="ppyes-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  13. Privacy policy
+                </h2>
+                <p className="mt-3">
+                  We care about data privacy and security. Please review our{" "}
+                  <a
+                    href={`${SITE_URL}/privacy`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-words underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </a>
+                  . By using the Services, you agree to be bound by our
+                  Privacy Policy, which is incorporated into these Legal
+                  Terms. Please be advised the Services are hosted in India.
+                  If you access the Services from any other region with laws
+                  governing personal data that differ from India&rsquo;s, by
+                  continuing to use the Services you consent to have your data
+                  transferred to and processed in India.
+                </p>
+              </section>
+
+              <section id="copyrightno" className="scroll-mt-20" aria-labelledby="copyrightno-h">
+                <h2 id="copyrightno-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  14. Copyright infringements
+                </h2>
+                <p className="mt-3">
+                  We respect the intellectual property rights of others. If
+                  you believe that material available on or through the
+                  Services infringes a copyright you own or control, please
+                  immediately notify us using the contact information below
+                  (a &ldquo;Notification&rdquo;). A copy of your Notification
+                  will be sent to the person who posted or stored the
+                  material. You may be held liable for damages if you make
+                  material misrepresentations in a Notification, so if you
+                  are unsure whether material infringes your copyright,
+                  consider contacting an attorney first.
+                </p>
+              </section>
+
+              <section id="terms" className="scroll-mt-20" aria-labelledby="terms-h">
+                <h2 id="terms-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  15. Term and termination
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    These Legal Terms remain in full force and effect while
+                    you use the Services. Without limiting any other
+                    provision, we reserve the right to, in our sole
+                    discretion and without notice or liability, deny access
+                    to and use of the Services to any person for any reason,
+                    including breach of any representation, warranty, or
+                    covenant in these Legal Terms or applicable law. We may
+                    terminate your use or delete your account and any
+                    content or information you posted at any time, without
+                    warning, in our sole discretion.
+                  </p>
+                  <p>
+                    If we terminate or suspend your account, you are
+                    prohibited from registering a new account under your
+                    name, a fake or borrowed name, or a third party&rsquo;s
+                    name. We reserve the right to take appropriate legal
+                    action, including civil, criminal, and injunctive
+                    redress.
+                  </p>
+                </div>
+              </section>
+
+              <section id="modifications" className="scroll-mt-20" aria-labelledby="modifications-h">
+                <h2 id="modifications-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  16. Modifications and interruptions
+                </h2>
+                <div className="mt-3 space-y-3">
+                  <p>
+                    We reserve the right to change, modify, or remove the
+                    contents of the Services at any time or for any reason at
+                    our sole discretion without notice. We have no obligation
+                    to update information on our Services and will not be
+                    liable for any modification, price change, suspension, or
+                    discontinuance of the Services.
+                  </p>
+                  <p>
+                    We cannot guarantee the Services will be available at all
+                    times, and may experience hardware, software, or other
+                    problems requiring maintenance, resulting in
+                    interruptions, delays, or errors. We reserve the right to
+                    change, suspend, discontinue, or modify the Services at
+                    any time without notice, and have no liability for any
+                    loss or damage caused by your inability to access the
+                    Services during downtime.
+                  </p>
+                </div>
+              </section>
+
+              <section id="law" className="scroll-mt-20" aria-labelledby="law-h">
+                <h2 id="law-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  17. Governing law
+                </h2>
+                <p className="mt-3">
+                  These Legal Terms shall be governed by and defined
+                  following the laws of India.{" "}
+                  <span className="font-semibold">{COMPANY_NAME}</span> and
+                  you irrevocably consent that the courts of India shall have
+                  exclusive jurisdiction to resolve any dispute arising in
+                  connection with these Legal Terms.
+                </p>
+              </section>
+
+              <section id="disputes" className="scroll-mt-20" aria-labelledby="disputes-h">
+                <h2 id="disputes-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  18. Dispute resolution
+                </h2>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Binding arbitration
+                </h3>
+                <p className="mt-2">
+                  If the parties are unable to resolve a dispute through
+                  informal negotiation, the dispute shall be finally resolved
+                  by arbitration in accordance with the United Nations
+                  Commission on International Trade Law Arbitration Rules in
+                  force at the time of commencement of the arbitration. The
+                  number of arbitrators shall be two (2). The seat of
+                  arbitration shall be Greater Noida, India. The language of
+                  the proceedings shall be English, and the governing law
+                  shall be the substantive law of India.
+                </p>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Restrictions
+                </h3>
+                <p className="mt-2">
+                  The Parties agree that any arbitration shall be limited to
+                  the dispute between the Parties individually. To the full
+                  extent permitted by law: (a) no arbitration shall be joined
+                  with any other proceeding; (b) there is no right to
+                  arbitrate on a class-action basis or utilize class-action
+                  procedures; and (c) there is no right to bring a dispute in
+                  a representative capacity on behalf of the general public
+                  or other persons.
+                </p>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Exceptions to arbitration
+                </h3>
+                <p className="mt-2">
+                  The Parties agree the following disputes are not subject to
+                  binding arbitration: (a) disputes seeking to enforce or
+                  protect, or concerning the validity of, intellectual
+                  property rights; (b) disputes related to allegations of
+                  theft, piracy, invasion of privacy, or unauthorized use; and
+                  (c) any claim for injunctive relief. If this provision is
+                  found illegal or unenforceable, the relevant dispute will be
+                  decided by a court of competent jurisdiction as described
+                  above, and the Parties agree to submit to that court&rsquo;s
+                  personal jurisdiction.
+                </p>
+              </section>
+
+              <section id="corrections" className="scroll-mt-20" aria-labelledby="corrections-h">
+                <h2 id="corrections-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  19. Corrections
+                </h2>
+                <p className="mt-3">
+                  There may be information on the Services that contains
+                  typographical errors, inaccuracies, or omissions, including
+                  descriptions, pricing, availability, and other information.
+                  We reserve the right to correct any errors, inaccuracies, or
+                  omissions and to change or update information on the
+                  Services at any time, without prior notice.
+                </p>
+              </section>
+
+              <section id="disclaimer" className="scroll-mt-20" aria-labelledby="disclaimer-h">
+                <h2 id="disclaimer-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  20. Disclaimer
+                </h2>
+                <p className="mt-3 uppercase">
+                  The Services are provided on an as-is and as-available
+                  basis. Your use of the Services is at your sole risk. To
+                  the fullest extent permitted by law, we disclaim all
+                  warranties, express or implied, including the implied
+                  warranties of merchantability, fitness for a particular
+                  purpose, and non-infringement. We make no warranties about
+                  the accuracy or completeness of the Services&rsquo; content
+                  and assume no liability for (1) errors or inaccuracies of
+                  content, (2) personal injury or property damage resulting
+                  from your use of the Services, (3) unauthorized access to
+                  our servers or any personal or financial information
+                  stored therein, (4) any interruption of transmission to or
+                  from the Services, (5) bugs or viruses transmitted through
+                  the Services by any third party, and/or (6) errors or
+                  omissions in content or any loss or damage incurred from use
+                  of content made available via the Services. We do not
+                  endorse or guarantee any product or service advertised by a
+                  third party through the Services and are not responsible
+                  for monitoring transactions between you and third-party
+                  providers.
+                </p>
+              </section>
+
+              <section id="liability" className="scroll-mt-20" aria-labelledby="liability-h">
+                <h2 id="liability-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  21. Limitations of liability
+                </h2>
+                <p className="mt-3 uppercase">
+                  In no event will we or our directors, employees, or agents
+                  be liable to you or any third party for any direct,
+                  indirect, consequential, exemplary, incidental, special, or
+                  punitive damages, including lost profit, lost revenue, or
+                  loss of data, arising from your use of the Services, even
+                  if advised of the possibility of such damages. Our
+                  liability to you for any cause, regardless of the form of
+                  action, will at all times be limited to the amount paid, if
+                  any, by you to us. Some jurisdictions do not allow
+                  limitations on implied warranties or exclusion of certain
+                  damages, so some of the above limitations may not apply to
+                  you.
+                </p>
+              </section>
+
+              <section id="indemnification" className="scroll-mt-20" aria-labelledby="indemnification-h">
+                <h2 id="indemnification-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  22. Indemnification
+                </h2>
+                <p className="mt-3">
+                  You agree to defend, indemnify, and hold us harmless,
+                  including our subsidiaries, affiliates, and respective
+                  officers, agents, partners, and employees, from any loss,
+                  damage, liability, claim, or demand, including reasonable
+                  attorneys&rsquo; fees, made by any third party due to or
+                  arising out of: (1) your Contributions; (2) use of the
+                  Services; (3) breach of these Legal Terms; (4) breach of
+                  your representations and warranties; (5) your violation of
+                  the rights of a third party; or (6) any harmful act toward
+                  another user of the Services. We reserve the right, at your
+                  expense, to assume exclusive defense and control of any
+                  matter for which you are required to indemnify us, and you
+                  agree to cooperate with our defense of such claims.
+                </p>
+              </section>
+
+              <section id="userdata" className="scroll-mt-20" aria-labelledby="userdata-h">
+                <h2 id="userdata-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  23. User data
+                </h2>
+                <p className="mt-3">
+                  We will maintain certain data that you transmit to the
+                  Services for the purpose of managing performance, as well
+                  as data relating to your use of the Services. Although we
+                  perform regular routine backups, you are solely responsible
+                  for all data you transmit or that relates to activity you
+                  undertake using the Services. We have no liability to you
+                  for any loss or corruption of such data, and you waive any
+                  right of action against us arising from such loss.
+                </p>
+              </section>
+
+              <section id="electronic" className="scroll-mt-20" aria-labelledby="electronic-h">
+                <h2 id="electronic-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  24. Electronic communications, transactions, and signatures
+                </h2>
+                <p className="mt-3">
+                  Visiting the Services, sending us emails, and completing
+                  online forms constitute electronic communications. You
+                  consent to receive electronic communications, and agree
+                  that all agreements, notices, disclosures, and other
+                  communications we provide electronically satisfy any legal
+                  requirement that such communication be in writing. You
+                  hereby agree to the use of electronic signatures,
+                  contracts, orders, and other records, and to electronic
+                  delivery of notices, policies, and records of transactions,
+                  and waive any rights or requirements under any statute or
+                  regulation requiring an original signature or delivery of
+                  non-electronic records.
+                </p>
+              </section>
+
+              <section id="sms" className="scroll-mt-20" aria-labelledby="sms-h">
+                <h2 id="sms-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  25. SMS text messaging
+                </h2>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Opting out
+                </h3>
+                <p className="mt-2">
+                  If at any time you wish to stop receiving SMS messages from
+                  us, simply reply to the text with &ldquo;STOP.&rdquo; You
+                  may receive a confirming SMS message; after that, you will
+                  no longer receive SMS messages from us. To join again,
+                  please sign up as you did the first time.
+                </p>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Message and data rates
+                </h3>
+                <p className="mt-2">
+                  Message and data rates may apply to any SMS messages sent or
+                  received. Rates are determined by your carrier and mobile
+                  plan. Carriers are not liable for delayed or undelivered
+                  messages. Contact your wireless provider with questions
+                  about your plan.
+                </p>
+
+                <h3 className="mt-6 text-base font-medium text-stone-900 dark:text-stone-100">
+                  Support
+                </h3>
+                <p className="mt-2">
+                  If you have questions or need assistance regarding our SMS
+                  communications, reply with the keyword HELP, or email us at{" "}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                    {CONTACT_EMAIL}
+                  </a>
+                  . For privacy questions, please read our{" "}
+                  <a
+                    href={`${SITE_URL}/privacy`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-words underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+              </section>
+
+              <section id="misc" className="scroll-mt-20" aria-labelledby="misc-h">
+                <h2 id="misc-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  26. Miscellaneous
+                </h2>
+                <p className="mt-3">
+                  These Legal Terms and any policies or operating rules
+                  posted by us on the Services constitute the entire
+                  agreement between you and us. Our failure to exercise or
+                  enforce any right or provision shall not operate as a
+                  waiver. These Legal Terms operate to the fullest extent
+                  permissible by law. We may assign any of our rights and
+                  obligations to others at any time, and are not liable for
+                  any loss, damage, delay, or failure to act caused by any
+                  cause beyond our reasonable control. If any provision is
+                  determined to be unlawful, void, or unenforceable, that
+                  provision is deemed severable and does not affect the
+                  validity of the remaining provisions. No joint venture,
+                  partnership, employment, or agency relationship is created
+                  between you and us as a result of these Legal Terms or use
+                  of the Services.
+                </p>
+              </section>
+
+              <section id="contact" className="scroll-mt-20" aria-labelledby="contact-h">
+                <h2 id="contact-h" className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+                  27. Contact us
+                </h2>
+                <p className="mt-3">
+                  In order to resolve a complaint regarding the Services or
+                  to receive further information regarding use of the
+                  Services, please contact us at:
+                </p>
+                <address className="mt-3 not-italic text-stone-700 dark:text-stone-300">
+                  <span className="font-semibold text-stone-900 dark:text-stone-50">
+                    {COMPANY_NAME}
+                  </span>
+                  <br />
+                  {MAILING_ADDRESS_LINES.map((line) => (
+                    <span key={line}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                    {CONTACT_EMAIL}
+                  </a>
+                </address>
+              </section>
+            </div>
+          </main>
         </div>
-      </section>
-
-      {/* TABLE OF CONTENTS */}
-      <nav
-        aria-label="Table of Contents"
-        className="mb-12 rounded-xl border border-slate-200 bg-slate-50 p-6 shadow-sm"
-      >
-        <h2 className="mb-4 text-xl font-bold text-slate-900">TABLE OF CONTENTS</h2>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-          <li>
-            <Link href="#services" className="text-blue-600 hover:underline">
-              1. OUR SERVICES
-            </Link>
-          </li>
-          <li>
-            <Link href="#ip" className="text-blue-600 hover:underline">
-              2. INTELLECTUAL PROPERTY RIGHTS
-            </Link>
-          </li>
-          <li>
-            <Link href="#userreps" className="text-blue-600 hover:underline">
-              3. USER REPRESENTATIONS
-            </Link>
-          </li>
-          <li>
-            <Link href="#userreg" className="text-blue-600 hover:underline">
-              4. USER REGISTRATION
-            </Link>
-          </li>
-          <li>
-            <Link href="#purchases" className="text-blue-600 hover:underline">
-              5. PURCHASES AND PAYMENT
-            </Link>
-          </li>
-          <li>
-            <Link href="#prohibited" className="text-blue-600 hover:underline">
-              6. PROHIBITED ACTIVITIES
-            </Link>
-          </li>
-          <li>
-            <Link href="#ugc" className="text-blue-600 hover:underline">
-              7. USER GENERATED CONTRIBUTIONS
-            </Link>
-          </li>
-          <li>
-            <Link href="#license" className="text-blue-600 hover:underline">
-              8. CONTRIBUTION LICENSE
-            </Link>
-          </li>
-          <li>
-            <Link href="#reviews" className="text-blue-600 hover:underline">
-              9. GUIDELINES FOR REVIEWS
-            </Link>
-          </li>
-          <li>
-            <Link href="#socialmedia" className="text-blue-600 hover:underline">
-              10. SOCIAL MEDIA
-            </Link>
-          </li>
-          <li>
-            <Link href="#thirdparty" className="text-blue-600 hover:underline">
-              11. THIRD-PARTY WEBSITES AND CONTENT
-            </Link>
-          </li>
-          <li>
-            <Link href="#sitemanage" className="text-blue-600 hover:underline">
-              12. SERVICES MANAGEMENT
-            </Link>
-          </li>
-          <li>
-            <Link href="#ppyes" className="text-blue-600 hover:underline">
-              13. PRIVACY POLICY
-            </Link>
-          </li>
-          <li>
-            <Link href="#copyrightno" className="text-blue-600 hover:underline">
-              14. COPYRIGHT INFRINGEMENTS
-            </Link>
-          </li>
-          <li>
-            <Link href="#terms" className="text-blue-600 hover:underline">
-              15. TERM AND TERMINATION
-            </Link>
-          </li>
-          <li>
-            <Link href="#modifications" className="text-blue-600 hover:underline">
-              16. MODIFICATIONS AND INTERRUPTIONS
-            </Link>
-          </li>
-          <li>
-            <Link href="#law" className="text-blue-600 hover:underline">
-              17. GOVERNING LAW
-            </Link>
-          </li>
-          <li>
-            <Link href="#disputes" className="text-blue-600 hover:underline">
-              18. DISPUTE RESOLUTION
-            </Link>
-          </li>
-          <li>
-            <Link href="#corrections" className="text-blue-600 hover:underline">
-              19. CORRECTIONS
-            </Link>
-          </li>
-          <li>
-            <Link href="#disclaimer" className="text-blue-600 hover:underline">
-              20. DISCLAIMER
-            </Link>
-          </li>
-          <li>
-            <Link href="#liability" className="text-blue-600 hover:underline">
-              21. LIMITATIONS OF LIABILITY
-            </Link>
-          </li>
-          <li>
-            <Link href="#indemnification" className="text-blue-600 hover:underline">
-              22. INDEMNIFICATION
-            </Link>
-          </li>
-          <li>
-            <Link href="#userdata" className="text-blue-600 hover:underline">
-              23. USER DATA
-            </Link>
-          </li>
-          <li>
-            <Link href="#electronic" className="text-blue-600 hover:underline">
-              24. ELECTRONIC COMMUNICATIONS, TRANSACTIONS, AND SIGNATURES
-            </Link>
-          </li>
-          <li>
-            <Link href="#sms" className="text-blue-600 hover:underline">
-              25. SMS TEXT MESSAGING
-            </Link>
-          </li>
-          <li>
-            <Link href="#misc" className="text-blue-600 hover:underline">
-              26. MISCELLANEOUS
-            </Link>
-          </li>
-          <li>
-            <Link href="#contact" className="text-blue-600 hover:underline">
-              27. CONTACT US
-            </Link>
-          </li>
-        </ul>
-      </nav>
-
-      {/* CONTENT SECTIONS */}
-      <div className="space-y-10">
-        <section id="services" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">1. OUR SERVICES</h2>
-          <p className="leading-relaxed">
-            The information provided when using the Services is not intended for
-            distribution to or use by any person or entity in any jurisdiction or country
-            where such distribution or use would be contrary to law or regulation or
-            which would subject us to any registration requirement within such
-            jurisdiction or country. Accordingly, those persons who choose to access the
-            Services from other locations do so on their own initiative and are solely
-            responsible for compliance with local laws, if and to the extent local laws
-            are applicable.
-          </p>
-        </section>
-
-        <section id="ip" className="scroll-mt-20">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">
-            2. INTELLECTUAL PROPERTY RIGHTS
-          </h2>
-          
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Our intellectual property
-          </h3>
-          <div className="mb-6 space-y-4 leading-relaxed">
-            <p>
-              We are the owner or the licensee of all intellectual property rights in our
-              Services, including all source code, databases, functionality, software,
-              website designs, audio, video, text, photographs, and graphics in the
-              Services (collectively, the &quot;Content&quot;), as well as the
-              trademarks, service marks, and logos contained therein (the
-              &quot;Marks&quot;).
-            </p>
-            <p>
-              Our Content and Marks are protected by copyright and trademark laws (and
-              various other intellectual property rights and unfair competition laws) and
-              treaties around the world.
-            </p>
-            <p>
-              The Content and Marks are provided in or through the Services &quot;AS
-              IS&quot; for your personal, non-commercial use only.
-            </p>
-          </div>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Your use of our Services
-          </h3>
-          <div className="mb-6 space-y-4 leading-relaxed">
-            <p>
-              Subject to your compliance with these Legal Terms, including the{' '}
-              <Link href="#prohibited" className="text-blue-600 hover:underline">
-                PROHIBITED ACTIVITIES
-              </Link>{' '}
-              section below, we grant you a non-exclusive, non-transferable, revocable
-              license to:
-            </p>
-            <ul className="list-disc pl-8 space-y-2">
-              <li>access the Services; and</li>
-              <li>
-                download or print a copy of any portion of the Content to which you have
-                properly gained access,
-              </li>
-            </ul>
-            <p>solely for your personal, non-commercial use.</p>
-            <p>
-              Except as set out in this section or elsewhere in our Legal Terms, no part
-              of the Services and no Content or Marks may be copied, reproduced,
-              aggregated, republished, uploaded, posted, publicly displayed, encoded,
-              translated, transmitted, distributed, sold, licensed, or otherwise
-              exploited for any commercial purpose whatsoever, without our express prior
-              written permission.
-            </p>
-            <p>
-              If you wish to make any use of the Services, Content, or Marks other than
-              as set out in this section or elsewhere in our Legal Terms, please address
-              your request to:{' '}
-              <a
-                href="mailto:backspaces.devs@gmail.com"
-                className="text-blue-600 hover:underline"
-              >
-                backspaces.devs@gmail.com
-              </a>
-              . If we ever grant you the permission to post, reproduce, or publicly
-              display any part of our Services or Content, you must identify us as the
-              owners or licensors of the Services, Content, or Marks and ensure that any
-              copyright or proprietary notice appears or is visible on posting,
-              reproducing, or displaying our Content.
-            </p>
-            <p>
-              We reserve all rights not expressly granted to you in and to the Services,
-              Content, and Marks.
-            </p>
-            <p>
-              Any breach of these Intellectual Property Rights will constitute a material
-              breach of our Legal Terms and your right to use our Services will terminate
-              immediately.
-            </p>
-          </div>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Your submissions and contributions
-          </h3>
-          <div className="mb-6 space-y-4 leading-relaxed">
-            <p>
-              Please review this section and the{' '}
-              <Link href="#prohibited" className="text-blue-600 hover:underline">
-                PROHIBITED ACTIVITIES
-              </Link>{' '}
-              section carefully prior to using our Services to understand the (a) rights
-              you give us and (b) obligations you have when you post or upload any
-              content through the Services.
-            </p>
-            <p>
-              <strong>Submissions:</strong> By directly sending us any question, comment,
-              suggestion, idea, feedback, or other information about the Services
-              (&quot;Submissions&quot;), you agree to assign to us all intellectual
-              property rights in such Submission. You agree that we shall own this
-              Submission and be entitled to its unrestricted use and dissemination for
-              any lawful purpose, commercial or otherwise, without acknowledgment or
-              compensation to you.
-            </p>
-            <p>
-              <strong>Contributions:</strong> The Services may invite you to chat,
-              contribute to, or participate in blogs, message boards, online forums, and
-              other functionality during which you may create, submit, post, display,
-              transmit, publish, distribute, or broadcast content and materials to us or
-              through the Services, including but not limited to text, writings, video,
-              audio, photographs, music, graphics, comments, reviews, rating suggestions,
-              personal information, or other material (&quot;Contributions&quot;). Any
-              Submission that is publicly posted shall also be treated as a Contribution.
-            </p>
-            <p>
-              You understand that Contributions may be viewable by other users of the
-              Services and possibly through third-party websites.
-            </p>
-            <p>
-              <strong>
-                When you post Contributions, you grant us a license (including use of
-                your name, trademarks, and logos):
-              </strong>{' '}
-              By posting any Contributions, you grant us an unrestricted, unlimited,
-              irrevocable, perpetual, non-exclusive, transferable, royalty-free,
-              fully-paid, worldwide right, and license to: use, copy, reproduce,
-              distribute, sell, resell, publish, broadcast, retitle, store, publicly
-              perform, publicly display, reformat, translate, excerpt (in whole or in
-              part), and exploit your Contributions (including, without limitation, your
-              image, name, and voice) for any purpose, commercial, advertising, or
-              otherwise, to prepare derivative works of, or incorporate into other works,
-              your Contributions, and to sublicense the licenses granted in this section.
-              Our use and distribution may occur in any media formats and through any
-              media channels.
-            </p>
-            <p>
-              This license includes our use of your name, company name, and franchise
-              name, as applicable, and any of the trademarks, service marks, trade names,
-              logos, and personal and commercial images you provide.
-            </p>
-            <p>
-              <strong>You are responsible for what you post or upload:</strong> By
-              sending us Submissions and/or posting Contributions through any part of the
-              Services or making Contributions accessible through the Services by linking
-              your account through the Services to any of your social networking
-              accounts, you:
-            </p>
-            <ul className="list-disc pl-8 space-y-2">
-              <li>
-                confirm that you have read and agree with our{' '}
-                <Link href="#prohibited" className="text-blue-600 hover:underline">
-                  PROHIBITED ACTIVITIES
-                </Link>{' '}
-                and will not post, send, publish, upload, or transmit through the Services
-                any Submission nor post any Contribution that is illegal, harassing,
-                hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory,
-                threatening to any person or group, sexually explicit, false,
-                inaccurate, deceitful, or misleading;
-              </li>
-              <li>
-                to the extent permissible by applicable law, waive any and all moral
-                rights to any such Submission and/or Contribution;
-              </li>
-              <li>
-                warrant that any such Submission and/or Contributions are original to you
-                or that you have the necessary rights and licenses to submit such
-                Submissions and/or Contributions and that you have full authority to
-                grant us the above-mentioned rights in relation to your Submissions
-                and/or Contributions; and
-              </li>
-              <li>
-                warrant and represent that your Submissions and/or Contributions do not
-                constitute confidential information.
-              </li>
-            </ul>
-            <p>
-              You are solely responsible for your Submissions and/or Contributions and
-              you expressly agree to reimburse us for any and all losses that we may
-              suffer because of your breach of (a) this section, (b) any third party’s
-              intellectual property rights, or (c) applicable law.
-            </p>
-            <p>
-              <strong>We may remove or edit your Content:</strong> Although we have no
-              obligation to monitor any Contributions, we shall have the right to remove
-              or edit any Contributions at any time without notice if in our reasonable
-              opinion we consider such Contributions harmful or in breach of these Legal
-              Terms. If we remove or edit any such Contributions, we may also suspend or
-              disable your account and report you to the authorities.
-            </p>
-          </div>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Copyright infringement
-          </h3>
-          <div className="mb-6 space-y-4 leading-relaxed">
-            <p>
-              We respect the intellectual property rights of others. If you believe that
-              any material available on or through the Services infringes upon any
-              copyright you own or control, please immediately refer to the{' '}
-              <Link href="#copyrightno" className="text-blue-600 hover:underline">
-                COPYRIGHT INFRINGEMENTS
-              </Link>{' '}
-              section below.
-            </p>
-          </div>
-        </section>
-
-        <section id="userreps" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            3. USER REPRESENTATIONS
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              By using the Services, you represent and warrant that: (1) all registration
-              information you submit will be true, accurate, current, and complete; (2)
-              you will maintain the accuracy of such information and promptly update such
-              registration information as necessary; (3) you have the legal capacity and
-              you agree to comply with these Legal Terms; (4) you are not a minor in the
-              jurisdiction in which you reside; (5) you will not access the Services
-              through automated or non-human means, whether through a bot, script, or
-              otherwise; (6) you will not use the Services for any illegal or
-              unauthorized purpose; and (7) your use of the Services will not violate any
-              applicable law or regulation.
-            </p>
-            <p>
-              If you provide any information that is untrue, inaccurate, not current, or
-              incomplete, we have the right to suspend or terminate your account and
-              refuse any and all current or future use of the Services (or any portion
-              thereof).
-            </p>
-          </div>
-        </section>
-
-        <section id="userreg" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            4. USER REGISTRATION
-          </h2>
-          <p className="leading-relaxed">
-            You may be required to register to use the Services. You agree to keep your
-            password confidential and will be responsible for all use of your account and
-            password. We reserve the right to remove, reclaim, or change a username you
-            select if we determine, in our sole discretion, that such username is
-            inappropriate, obscene, or otherwise objectionable.
-          </p>
-        </section>
-
-        <section id="purchases" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            5. PURCHASES AND PAYMENT
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>We accept the following forms of payment:</p>
-            <ul className="list-disc pl-8 space-y-2">
-              <li>Visa</li>
-              <li>Mastercard</li>
-            </ul>
-            <p>
-              You agree to provide current, complete, and accurate purchase and account
-              information for all purchases made via the Services. You further agree to
-              promptly update account and payment information, including email address,
-              payment method, and payment card expiration date, so that we can complete
-              your transactions and contact you as needed. Sales tax will be added to the
-              price of purchases as deemed required by us. We may change prices at any
-              time. All payments shall be in INR.
-            </p>
-            <p>
-              You agree to pay all charges at the prices then in effect for your
-              purchases and any applicable shipping fees, and you authorize us to charge
-              your chosen payment provider for any such amounts upon placing your order.
-              We reserve the right to correct any errors or mistakes in pricing, even if
-              we have already requested or received payment.
-            </p>
-            <p>
-              We reserve the right to refuse any order placed through the Services. We
-              may, in our sole discretion, limit or cancel quantities purchased per
-              person, per household, or per order. These restrictions may include orders
-              placed by or under the same customer account, the same payment method,
-              and/or orders that use the same billing or shipping address. We reserve the
-              right to limit or prohibit orders that, in our sole judgment, appear to be
-              placed by dealers, resellers, or distributors.
-            </p>
-          </div>
-        </section>
-
-        <section id="prohibited" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            6. PROHIBITED ACTIVITIES
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              You may not access or use the Services for any purpose other than that for
-              which we make the Services available. The Services may not be used in
-              connection with any commercial endeavors except those that are specifically
-              endorsed or approved by us.
-            </p>
-            <p>As a user of the Services, you agree not to:</p>
-            <ul className="list-disc pl-8 space-y-2">
-              <li>
-                Systematically retrieve data or other content from the Services to create
-                or compile, directly or indirectly, a collection, compilation, database,
-                or directory without written permission from us.
-              </li>
-              <li>
-                Trick, defraud, or mislead us and other users, especially in any attempt
-                to learn sensitive account information such as user passwords.
-              </li>
-              <li>
-                Circumvent, disable, or otherwise interfere with security-related
-                features of the Services, including features that prevent or restrict
-                the use or copying of any Content or enforce limitations on the use of
-                the Services and/or the Content contained therein.
-              </li>
-              <li>
-                Disparage, tarnish, or otherwise harm, in our opinion, us and/or the
-                Services.
-              </li>
-              <li>
-                Use any information obtained from the Services in order to harass, abuse,
-                or harm another person.
-              </li>
-              <li>
-                Make improper use of our support services or submit false reports of
-                abuse or misconduct.
-              </li>
-              <li>
-                Use the Services in a manner inconsistent with any applicable laws or
-                regulations.
-              </li>
-              <li>Engage in unauthorized framing of or linking to the Services.</li>
-              <li>
-                Upload or transmit (or attempt to upload or to transmit) viruses, Trojan
-                horses, or other material, including excessive use of capital letters and
-                spamming (continuous posting of repetitive text), that interferes with
-                any party’s uninterrupted use and enjoyment of the Services or modifies,
-                impairs, disrupts, alters, or interferes with the use, features,
-                functions, operation, or maintenance of the Services.
-              </li>
-              <li>
-                Engage in any automated use of the system, such as using scripts to send
-                comments or messages, or using any data mining, robots, or similar data
-                gathering and extraction tools.
-              </li>
-              <li>
-                Delete the copyright or other proprietary rights notice from any Content.
-              </li>
-              <li>
-                Attempt to impersonate another user or person or use the username of
-                another user.
-              </li>
-              <li>
-                Upload or transmit (or attempt to upload or to transmit) any material
-                that acts as a passive or active information collection or transmission
-                mechanism, including without limitation, clear graphics interchange
-                formats (&quot;gifs&quot;), 1×1 pixels, web bugs, cookies, or other
-                similar devices (sometimes referred to as &quot;spyware&quot; or
-                &quot;passive collection mechanisms&quot; or &quot;pcms&quot;).
-              </li>
-              <li>
-                Interfere with, disrupt, or create an undue burden on the Services or
-                the networks or services connected to the Services.
-              </li>
-              <li>
-                Harass, annoy, intimidate, or threaten any of our employees or agents
-                engaged in providing any portion of the Services to you.
-              </li>
-              <li>
-                Attempt to bypass any measures of the Services designed to prevent or
-                restrict access to the Services, or any portion of the Services.
-              </li>
-              <li>
-                Copy or adapt the Services&apos; software, including but not limited to
-                Flash, PHP, HTML, JavaScript, or other code.
-              </li>
-              <li>
-                Except as permitted by applicable law, decipher, decompile, disassemble,
-                or reverse engineer any of the software comprising or in any way making
-                up a part of the Services.
-              </li>
-              <li>
-                Except as may be the result of standard search engine or Internet browser
-                usage, use, launch, develop, or distribute any automated system,
-                including without limitation, any spider, robot, cheat utility, scraper,
-                or offline reader that accesses the Services, or use or launch any
-                unauthorized script or other software.
-              </li>
-              <li>
-                Use a buying agent or purchasing agent to make purchases on the Services.
-              </li>
-              <li>
-                Make any unauthorized use of the Services, including collecting usernames
-                and/or email addresses of users by electronic or other means for the
-                purpose of sending unsolicited email, or creating user accounts by
-                automated means or under false pretenses.
-              </li>
-              <li>
-                Use the Services as part of any effort to compete with us or otherwise
-                use the Services and/or the Content for any revenue-generating endeavor
-                or commercial enterprise.
-              </li>
-              <li>Use the Services to advertise or offer to sell goods and services.</li>
-            </ul>
-          </div>
-        </section>
-
-        <section id="ugc" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            7. USER GENERATED CONTRIBUTIONS
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              The Services may invite you to chat, contribute to, or participate in
-              blogs, message boards, online forums, and other functionality, and may
-              provide you with the opportunity to create, submit, post, display,
-              transmit, perform, publish, distribute, or broadcast content and materials
-              to us or on the Services, including but not limited to text, writings,
-              video, audio, photographs, graphics, comments, suggestions, or personal
-              information or other material (collectively, &quot;Contributions&quot;).
-              Contributions may be viewable by other users of the Services and through
-              third-party websites. As such, any Contributions you transmit may be
-              treated as non-confidential and non-proprietary. When you create or make
-              available any Contributions, you thereby represent and warrant that:
-            </p>
-            <ul className="list-disc pl-8 space-y-2">
-              <li>
-                The creation, distribution, transmission, public display, or performance,
-                and the accessing, downloading, or copying of your Contributions do not
-                and will not infringe the proprietary rights, including but not limited
-                to the copyright, patent, trademark, trade secret, or moral rights of any
-                third party.
-              </li>
-              <li>
-                You are the creator and owner of or have the necessary licenses, rights,
-                consents, releases, and permissions to use and to authorize us, the
-                Services, and other users of the Services to use your Contributions in
-                any manner contemplated by the Services and these Legal Terms.
-              </li>
-              <li>
-                You have the written consent, release, and/or permission of each and
-                every identifiable individual person in your Contributions to use the
-                name or likeness of each and every such identifiable individual person to
-                enable inclusion and use of your Contributions in any manner contemplated
-                by the Services and these Legal Terms.
-              </li>
-              <li>Your Contributions are not false, inaccurate, or misleading.</li>
-              <li>
-                Your Contributions are not unsolicited or unauthorized advertising,
-                promotional materials, pyramid schemes, chain letters, spam, mass
-                mailings, or other forms of solicitation.
-              </li>
-              <li>
-                Your Contributions are not obscene, lewd, lascivious, filthy, violent,
-                harassing, libelous, slanderous, or otherwise objectionable (as
-                determined by us).
-              </li>
-              <li>
-                Your Contributions do not ridicule, mock, disparage, intimidate, or abuse
-                anyone.
-              </li>
-              <li>
-                Your Contributions are not used to harass or threaten (in the legal sense
-                of those terms) any other person and to promote violence against a
-                specific person or class of people.
-              </li>
-              <li>
-                Your Contributions do not violate any applicable law, regulation, or
-                rule.
-              </li>
-              <li>
-                Your Contributions do not violate the privacy or publicity rights of any
-                third party.
-              </li>
-              <li>
-                Your Contributions do not violate any applicable law concerning child
-                pornography, or otherwise intended to protect the health or well-being
-                of minors.
-              </li>
-              <li>
-                Your Contributions do not include any offensive comments that are
-                connected to race, national origin, gender, sexual preference, or
-                physical handicap.
-              </li>
-              <li>
-                Your Contributions do not otherwise violate, or link to material that
-                violates, any provision of these Legal Terms, or any applicable law or
-                regulation.
-              </li>
-            </ul>
-            <p>
-              Any use of the Services in violation of the foregoing violates these Legal
-              Terms and may result in, among other things, termination or suspension of
-              your rights to use the Services.
-            </p>
-          </div>
-        </section>
-
-        <section id="license" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            8. CONTRIBUTION LICENSE
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              By posting your Contributions to any part of the Services or making
-              Contributions accessible to the Services by linking your account from the
-              Services to any of your social networking accounts, you automatically
-              grant, and you represent and warrant that you have the right to grant, to
-              us an unrestricted, unlimited, irrevocable, perpetual, non-exclusive,
-              transferable, royalty-free, fully-paid, worldwide right, and license to
-              host, use, copy, reproduce, disclose, sell, resell, publish, broadcast,
-              retitle, archive, store, cache, publicly perform, publicly display,
-              reformat, translate, transmit, excerpt (in whole or in part), and
-              distribute such Contributions (including, without limitation, your image
-              and voice) for any purpose, commercial, advertising, or otherwise, and to
-              prepare derivative works of, or incorporate into other works, such
-              Contributions, and grant and authorize sublicenses of the foregoing. The
-              use and distribution may occur in any media formats and through any media
-              channels.
-            </p>
-            <p>
-              This license will apply to any form, media, or technology now known or
-              hereafter developed, and includes our use of your name, company name, and
-              franchise name, as applicable, and any of the trademarks, service marks,
-              trade names, logos, and personal and commercial images you provide. You
-              waive all moral rights in your Contributions, and you warrant that moral
-              rights have not otherwise been asserted in your Contributions.
-            </p>
-            <p>
-              We do not assert any ownership over your Contributions. You retain full
-              ownership of all of your Contributions and any intellectual property rights
-              or other proprietary rights associated with your Contributions. We are not
-              liable for any statements or representations in your Contributions provided
-              by you in any area on the Services. You are solely responsible for your
-              Contributions to the Services and you expressly agree to exonerate us from
-              any and all responsibility and to refrain from any legal action against us
-              regarding your Contributions.
-            </p>
-            <p>
-              We have the right, in our sole and absolute discretion, (1) to edit,
-              redact, or otherwise change any Contributions; (2) to re-categorize any
-              Contributions to place them in more appropriate locations on the Services;
-              and (3) to pre-screen or delete any Contributions at any time and for any
-              reason, without notice. We have no obligation to monitor your Contributions.
-            </p>
-          </div>
-        </section>
-
-        <section id="reviews" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            9. GUIDELINES FOR REVIEWS
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              We may provide you areas on the Services to leave reviews or ratings. When
-              posting a review, you must comply with the following criteria: (1) you
-              should have firsthand experience with the person/entity being reviewed; (2)
-              your reviews should not contain offensive profanity, or abusive, racist,
-              offensive, or hateful language; (3) your reviews should not contain
-              discriminatory references based on religion, race, gender, national origin,
-              age, marital status, sexual orientation, or disability; (4) your reviews
-              should not contain references to illegal activity; (5) you should not be
-              affiliated with competitors if posting negative reviews; (6) you should not
-              make any conclusions as to the legality of conduct; (7) you may not post
-              any false or misleading statements; and (8) you may not organize a campaign
-              encouraging others to post reviews, whether positive or negative.
-            </p>
-            <p>
-              We may accept, reject, or remove reviews in our sole discretion. We have
-              absolutely no obligation to screen reviews or to delete reviews, even if
-              anyone considers reviews objectionable or inaccurate. Reviews are not
-              endorsed by us, and do not necessarily represent our opinions or the views
-              of any of our affiliates or partners. We do not assume liability for any
-              review or for any claims, liabilities, or losses resulting from any review.
-              By posting a review, you hereby grant to us a perpetual, non-exclusive,
-              worldwide, royalty-free, fully paid, assignable, and sublicensable right
-              and license to reproduce, modify, translate, transmit by any means,
-              display, perform, and/or distribute all content relating to review.
-            </p>
-          </div>
-        </section>
-
-        <section id="socialmedia" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            10. SOCIAL MEDIA
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              As part of the functionality of the Services, you may link your account
-              with online accounts you have with third-party service providers (each such
-              account, a &quot;Third-Party Account&quot;) by either: (1) providing your
-              Third-Party Account login information through the Services; or (2) allowing
-              us to access your Third-Party Account, as is permitted under the applicable
-              terms and conditions that govern your use of each Third-Party Account. You
-              represent and warrant that you are entitled to disclose your Third-Party
-              Account login information to us and/or grant us access to your Third-Party
-              Account, without breach by you of any of the terms and conditions that
-              govern your use of the applicable Third-Party Account, and without
-              obligating us to pay any fees or making us subject to any usage limitations
-              imposed by the third-party service provider of the Third-Party Account. By
-              granting us access to any Third-Party Accounts, you understand that (1) we
-              may access, make available, and store (if applicable) any content that you
-              have provided to and stored in your Third-Party Account (the &quot;Social
-              Network Content&quot;) so that it is available on and through the Services
-              via your account, including without limitation any friend lists and (2) we
-              may submit to and receive from your Third-Party Account additional
-              information to the extent you are notified when you link your account with
-              the Third-Party Account. Depending on the Third-Party Accounts you choose
-              and subject to the privacy settings that you have set in such Third-Party
-              Accounts, personally identifiable information that you post to your
-              Third-Party Accounts may be available on and through your account on the
-              Services. Please note that if a Third-Party Account or associated service
-              becomes unavailable or our access to such Third-Party Account is terminated
-              by the third-party service provider, then Social Network Content may no
-              longer be available on and through the Services. You will have the ability
-              to disable the connection between your account on the Services and your
-              Third-Party Accounts at any time. PLEASE NOTE THAT YOUR RELATIONSHIP WITH
-              THE THIRD-PARTY SERVICE PROVIDERS ASSOCIATED WITH YOUR THIRD-PARTY ACCOUNTS
-              IS GOVERNED SOLELY BY YOUR AGREEMENT(S) WITH SUCH THIRD-PARTY SERVICE
-              PROVIDERS. We make no effort to review any Social Network Content for any
-              purpose, including but not limited to, for accuracy, legality, or
-              non-infringement, and we are not responsible for any Social Network
-              Content. You acknowledge and agree that we may access your email address
-              book associated with a Third-Party Account and your contacts list stored on
-              your mobile device or tablet computer solely for purposes of identifying
-              and informing you of those contacts who have also registered to use the
-              Services. You can deactivate the connection between the Services and your
-              Third-Party Account by contacting us using the contact information below or
-              through your account settings (if applicable). We will attempt to delete
-              any information stored on our servers that was obtained through such
-              Third-Party Account, except the username and profile picture that become
-              associated with your account.
-            </p>
-          </div>
-        </section>
-
-        <section id="thirdparty" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            11. THIRD-PARTY WEBSITES AND CONTENT
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              The Services may contain (or you may be sent via the Site) links to other
-              websites (&quot;Third-Party Websites&quot;) as well as articles,
-              photographs, text, graphics, pictures, designs, music, sound, video,
-              information, applications, software, and other content or items belonging
-              to or originating from third parties (&quot;Third-Party Content&quot;).
-              Such Third-Party Websites and Third-Party Content are not investigated,
-              monored, or checked for accuracy, appropriateness, or completeness by us,
-              and we are not responsible for any Third-Party Websites accessed through
-              the Services or any Third-Party Content posted on, available through, or
-              installed from the Services, including the content, accuracy,
-              offensiveness, opinions, reliability, privacy practices, or other policies
-              of or contained in the Third-Party Websites or the Third-Party Content.
-              Inclusion of, linking to, or permitting the use or installation of any
-              Third-Party Websites or any Third-Party Content does not imply approval or
-              endorsement thereof by us. If you decide to leave the Services and access
-              the Third-Party Websites or to use or install any Third-Party Content, you
-              do so at your own risk, and you should be aware these Legal Terms no
-              longer govern. You should review the applicable terms and policies,
-              including privacy and data gathering practices, of any website to which you
-              navigate from the Services or relating to any applications you use or
-              install from the Services. Any purchases you make through Third-Party
-              Websites will be through other websites and from other companies, and we
-              take no responsibility whatsoever in relation to such purchases which are
-              exclusively between you and the applicable third party. You agree and
-              acknowledge that we do not endorse the products or services offered on
-              Third-Party Websites and you shall hold us blameless from any harm caused
-              by your purchase of such products or services. Additionally, you shall hold
-              us blameless from any losses sustained by you or harm caused to you
-              relating to or resulting in any way from any Third-Party Content or any
-              contact with Third-Party Websites.
-            </p>
-          </div>
-        </section>
-
-        <section id="sitemanage" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            12. SERVICES MANAGEMENT
-          </h2>
-          <p className="leading-relaxed">
-            We reserve the right, but not the obligation, to: (1) monitor the Services
-            for violations of these Legal Terms; (2) take appropriate legal action
-            against anyone who, in our sole discretion, violates the law or these Legal
-            Terms, including without limitation, reporting such user to law enforcement
-            authorities; (3) in our sole discretion and without limitation, refuse,
-            restrict access to, limit the availability of, or disable (to the extent
-            technologically feasible) any of your Contributions or any portion thereof;
-            (4) in our sole discretion and without limitation, notice, or liability, to
-            remove from the Services or otherwise disable all files and content that are
-            excessive in size or are in any way burdensome to our systems; and (5)
-            otherwise manage the Services in a manner designed to protect our rights and
-            property and to facilitate the proper functioning of the Services.
-          </p>
-        </section>
-
-        <section id="ppyes" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            13. PRIVACY POLICY
-          </h2>
-          <p className="leading-relaxed">
-            We care about data privacy and security. Please review our Privacy Policy:{' '}
-            <strong>
-              <a
-                href="https://www.backspaces.com/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-words"
-              >
-                https://www.backspaces.com/privacy
-              </a>
-            </strong>
-            . By using the Services, you agree to be bound by our Privacy Policy, which
-            is incorporated into these Legal Terms. Please be advised the Services are
-            hosted in <span className="notranslate">India</span>. If you access the
-            Services from any other region of the world with laws or other requirements
-            governing personal data collection, use, or disclosure that differ from
-            applicable laws in <span className="notranslate">India</span>, then through
-            your continued use of the Services, you are transferring your data to{' '}
-            <span className="notranslate">India</span>, and you expressly consent to
-            have your data transferred to and processed in{' '}
-            <span className="notranslate">India</span>.
-          </p>
-        </section>
-
-        <section id="copyrightno" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            14. COPYRIGHT INFRINGEMENTS
-          </h2>
-          <p className="leading-relaxed">
-            We respect the intellectual property rights of others. If you believe that
-            any material available on or through the Services infringes upon any
-            copyright you own or control, please immediately notify us using the contact
-            information provided below (a &quot;Notification&quot;). A copy of your
-            Notification will be sent to the person who posted or stored the material
-            addressed in the Notification. Please be advised that pursuant to applicable
-            law you may be held liable for damages if you make material misrepresentations
-            in a Notification. Thus, if you are not sure that material located on or
-            linked to by the Services infringes your copyright, you should consider first
-            contacting an attorney.
-          </p>
-        </section>
-
-        <section id="terms" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            15. TERM AND TERMINATION
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              These Legal Terms shall remain in full force and effect while you use the
-              Services. WITHOUT LIMITING ANY OTHER PROVISION OF THESE LEGAL TERMS, WE
-              RESERVE THE RIGHT TO, IN OUR SOLE DISCRETION AND WITHOUT NOTICE OR
-              LIABILITY, DENY ACCESS TO AND USE OF THE SERVICES (INCLUDING BLOCKING
-              CERTAIN IP ADDRESSES), TO ANY PERSON FOR ANY REASON OR FOR NO REASON,
-              INCLUDING WITHOUT LIMITATION FOR BREACH OF ANY REPRESENTATION, WARRANTY, OR
-              COVENANT CONTAINED IN THESE LEGAL TERMS OR OF ANY APPLICABLE LAW OR
-              REGULATION. WE MAY TERMINATE YOUR USE OR PARTICIPATION IN THE SERVICES OR
-              DELETE YOUR ACCOUNT AND ANY CONTENT OR INFORMATION THAT YOU POSTED AT ANY
-              TIME, WITHOUT WARNING, IN OUR SOLE DISCRETION.
-            </p>
-            <p>
-              If we terminate or suspend your account for any reason, you are prohibited
-              from registering and creating a new account under your name, a fake or
-              borrowed name, or the name of any third party, even if you may be acting on
-              behalf of the third party. In addition to terminating or suspending your
-              account, we reserve the right to take appropriate legal action, including
-              without limitation pursuing civil, criminal, and injunctive redress.
-            </p>
-          </div>
-        </section>
-
-        <section id="modifications" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            16. MODIFICATIONS AND INTERRUPTIONS
-          </h2>
-          <div className="space-y-4 leading-relaxed">
-            <p>
-              We reserve the right to change, modify, or remove the contents of the
-              Services at any time or for any reason at our sole discretion without
-              notice. However, we have no obligation to update any information on our
-              Services. We will not be liable to you or any third party for any
-              modification, price change, suspension, or discontinuance of the Services.
-            </p>
-            <p>
-              We cannot guarantee the Services will be available at all times. We may
-              experience hardware, software, or other problems or need to perform
-              maintenance related to the Services, resulting in interruptions, delays, or
-              errors. We reserve the right to change, revise, update, suspend,
-              discontinue, or otherwise modify the Services at any time or for any reason
-              without notice to you. You agree that we have no liability whatsoever for
-              any loss, damage, or inconvenience caused by your inability to access or
-              use the Services during any downtime or discontinuance of the Services.
-              Nothing in these Legal Terms will be construed to obligate us to maintain
-              and support the Services or to supply any corrections, updates, or releases
-              in connection therewith.
-            </p>
-          </div>
-        </section>
-
-        <section id="law" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            17. GOVERNING LAW
-          </h2>
-          <p className="leading-relaxed">
-            These Legal Terms shall be governed by and defined following the laws of{' '}
-            <span className="notranslate">India</span>.{' '}
-            <span className="notranslate font-semibold">Backspaces</span> and yourself
-            irrevocably consent that the courts of{' '}
-            <span className="notranslate">India</span> shall have exclusive jurisdiction
-            to resolve any dispute which may arise in connection with these Legal Terms.
-          </p>
-        </section>
-
-        <section id="disputes" className="scroll-mt-20">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">
-            18. DISPUTE RESOLUTION
-          </h2>
-          
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Binding Arbitration
-          </h3>
-          <p className="mb-6 leading-relaxed">
-            If the parties are unable to resolve the dispute through informal
-            negotiation, the dispute shall be finally resolved by arbitration in
-            accordance with the United Nations Commission on International Trade Law
-            Arbitration Rules in force at the time of commencement of the arbitration.
-            The number of arbitrators shall be two (2). The seat, or legal place, or
-            arbitration shall be <span className="notranslate">Greater Noida</span>,{' '}
-            <span className="notranslate">India</span>. The language of the proceedings
-            shall be English. The governing law of these Legal Terms shall be
-            substantive law of <span className="notranslate">India</span>.
-          </p>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Restrictions
-          </h3>
-          <p className="mb-6 leading-relaxed">
-            The Parties agree that any arbitration shall be limited to the Dispute
-            between the Parties individually. To the full extent permitted by law, (a)
-            no arbitration shall be joined with any other proceeding; (b) there is no
-            right or authority for any Dispute to be arbitrated on a class-action basis
-            or to utilize class action procedures; and (c) there is no right or
-            authority for any Dispute to be brought in a purported representative
-            capacity on behalf of the general public or any other persons.
-          </p>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Exceptions to Arbitration
-          </h3>
-          <p className="leading-relaxed">
-            The Parties agree that the following Disputes are not subject to the above
-            provisions concerning binding arbitration: (a) any Disputes seeking to
-            enforce or protect, or concerning the validity of, any of the intellectual
-            property rights of a Party; (b) any Dispute related to, or arising from,
-            allegations of theft, piracy, invasion of privacy, or unauthorized use; and
-            (c) any claim for injunctive relief. If this provision is found to be
-            illegal or unenforceable, then neither Party will elect to arbitrate any
-            Dispute falling within that portion of this provision found to be illegal or
-            unenforceable and such Dispute shall be decided by a court of competent
-            jurisdiction within the courts listed for jurisdiction above, and the
-            Parties agree to submit to the personal jurisdiction of that court.
-          </p>
-        </section>
-
-        <section id="corrections" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            19. CORRECTIONS
-          </h2>
-          <p className="leading-relaxed">
-            There may be information on the Services that contains typographical errors,
-            inaccuracies, or omissions, including descriptions, pricing, availability,
-            and various other information. We reserve the right to correct any errors,
-            inaccuracies, or omissions and to change or update the information on the
-            Services at any time, without prior notice.
-          </p>
-        </section>
-
-        <section id="disclaimer" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            20. DISCLAIMER
-          </h2>
-          <p className="leading-relaxed uppercase">
-            The Services are provided on an as-is and as-available basis. You agree that
-            your use of the Services will be at your sole risk. To the fullest extent
-            permitted by law, we disclaim all warranties, express or implied, in
-            connection with the Services and your use thereof, including, without
-            limitation, the implied warranties of merchantability, fitness for a
-            particular purpose, and non-infringement. We make no warranties or
-            representations about the accuracy or completeness of the Services&apos;
-            content or the content of any websites or mobile applications linked to the
-            Services and we will assume no liability or responsibility for any (1)
-            errors, mistakes, or inaccuracies of content and materials, (2) personal
-            injury or property damage, of any nature whatsoever, resulting from your
-            access to and use of the Services, (3) any unauthorized access to or use of
-            our secure servers and/or any and all personal information and/or financial
-            information stored therein, (4) any interruption or cessation of
-            transmission to or from the Services, (5) any bugs, viruses, trojan horses,
-            or the like which may be transmitted to or through the Services by any third
-            party, and/or (6) any errors or omissions in any content and materials or
-            for any loss or damage of any kind incurred as a result of the use of any
-            content posted, transmitted, or otherwise made available via the Services. We
-            do not warrant, endorse, guarantee, or assume responsibility for any product
-            or service advertised or offered by a third party through the Services, any
-            hyperlinked website, or any website or mobile application featured in any
-            banner or other advertising, and we will not be a party to or in any way be
-            responsible for monitoring any transaction between you and any third-party
-            providers of products or services. As with the purchase of a product or
-            service through any medium or in any environment, you should use your best
-            judgment and exercise caution where appropriate.
-          </p>
-        </section>
-
-        <section id="liability" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            21. LIMITATIONS OF LIABILITY
-          </h2>
-          <p className="leading-relaxed uppercase">
-            In no event will we or our directors, employees, or agents be liable to you
-            or any third party for any direct, indirect, consequential, exemplary,
-            incidental, special, or punitive damages, including lost profit, lost
-            revenue, loss of data, or other damages arising from your use of the
-            Services, even if we have been advised of the possibility of such damages.
-            Notwithstanding anything to the contrary contained herein, our liability to
-            you for any cause whatsoever and regardless of the form of the action, will
-            at all times be limited to the amount paid, if any, by you to us. Certain US
-            state laws and international laws do not allow limitations on implied
-            warranties or the exclusion or limitation of certain damages. If these laws
-            apply to you, some or all of the above disclaimers or limitations may not
-            apply to you, and you may have additional rights.
-          </p>
-        </section>
-
-        <section id="indemnification" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            22. INDEMNIFICATION
-          </h2>
-          <p className="leading-relaxed">
-            You agree to defend, indemnify, and hold us harmless, including our
-            subsidiaries, affiliates, and all of our respective officers, agents,
-            partners, and employees, from and against any loss, damage, liability,
-            claim, or demand, including reasonable attorneys’ fees and expenses, made by
-            any third party due to or arising out of: (1) your Contributions; (2) use of
-            the Services; (3) breach of these Legal Terms; (4) any breach of your
-            representations and warranties set forth in these Legal Terms; (5) your
-            violation of the rights of a third party, including but not limited to
-            intellectual property rights; or (6) any overt harmful act toward any other
-            user of the Services with whom you connected via the Services.
-            Notwithstanding the foregoing, we reserve the right, at your expense, to
-            assume the exclusive defense and control of any matter for which you are
-            required to indemnify us, and you agree to cooperate, at your expense, with
-            our defense of such claims. We will use reasonable efforts to notify you of
-            any such claim, action, or proceeding which is subject to this indemnification
-            upon becoming aware of it.
-          </p>
-        </section>
-
-        <section id="userdata" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            23. USER DATA
-          </h2>
-          <p className="leading-relaxed">
-            We will maintain certain data that you transmit to the Services for the
-            purpose of managing the performance of the Services, as well as data
-            relating to your use of the Services. Although we perform regular routine
-            backups of data, you are solely responsible for all data that you transmit or
-            that relates to any activity you have undertaken using the Services. You
-            agree that we shall have no liability to you for any loss or corruption of
-            any such data, and you hereby waive any right of action against us arising
-            from any such loss or corruption of such data.
-          </p>
-        </section>
-
-        <section id="electronic" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            24. ELECTRONIC COMMUNICATIONS, TRANSACTIONS, AND SIGNATURES
-          </h2>
-          <p className="leading-relaxed">
-            Visiting the Services, sending us emails, and completing online forms
-            constitute electronic communications. You consent to receive electronic
-            communications, and you agree that all agreements, notices, disclosures, and
-            other communications we provide to you electronically, via email and on the
-            Services, satisfy any legal requirement that such communication be in
-            writing. YOU HEREBY AGREE TO THE USE OF ELECTRONIC SIGNATURES, CONTRACTS,
-            ORDERS, AND OTHER RECORDS, AND TO ELECTRONIC DELIVERY OF NOTICES, POLICIES,
-            AND RECORDS OF TRANSACTIONS INITIATED OR COMPLETED BY US OR VIA THE
-            SERVICES. You hereby waive any rights or requirements under any statutes,
-            regulations, rules, ordinances, or other laws in any jurisdiction which
-            require an original signature or delivery or retention of non-electronic
-            records, or to payments or the granting of credits by any means other than
-            electronic means.
-          </p>
-        </section>
-
-        <section id="sms" className="scroll-mt-20">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">
-            25. SMS TEXT MESSAGING
-          </h2>
-          
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Opting Out
-          </h3>
-          <p className="mb-6 leading-relaxed">
-            If at any time you wish to stop receiving SMS messages from us, simply reply
-            to the text with &quot;STOP.&quot; You may receive an SMS message confirming
-            your opt out. After this, you will no longer receive SMS messages from us. If
-            you want to join again, please sign up as you did the first time and we will
-            start sending SMS messages to you again.
-          </p>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Message and Data Rates
-          </h3>
-          <p className="mb-6 leading-relaxed">
-            Please be aware that message and data rates may apply to any SMS messages
-            sent or received. The rates are determined by your carrier and the specifics
-            of your mobile plan. Carriers are not liable for delayed or undelivered
-            messages. If you have any questions about your text plan or data plan,
-            contact your wireless provider.
-          </p>
-
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            Support
-          </h3>
-          <p className="leading-relaxed">
-            If you have any questions or need assistance regarding our SMS
-            communications, please reply with the keyword HELP. You can also email us at{' '}
-            <a
-              href="mailto:backspaces.devs@gmail.com"
-              className="text-blue-600 hover:underline"
-            >
-              backspaces.devs@gmail.com
-            </a>
-            . If you have any questions regarding privacy, please read our Privacy
-            Policy:{' '}
-            <a
-              href="https://www.backspaces.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline break-words"
-            >
-              https://www.backspaces.com/privacy
-            </a>
-            .
-          </p>
-        </section>
-
-        <section id="misc" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            26. MISCELLANEOUS
-          </h2>
-          <p className="leading-relaxed">
-            These Legal Terms and any policies or operating rules posted by us on the
-            Services or in respect to the Services constitute the entire agreement and
-            understanding between you and us. Our failure to exercise or enforce any
-            right or provision of these Legal Terms shall not operate as a waiver of such
-            right or provision. These Legal Terms operate to the fullest extent
-            permissible by law. We may assign any or all of our rights and obligations to
-            others at any time. We shall not be responsible or liable for any loss,
-            damage, delay, or failure to act caused by any cause beyond our reasonable
-            control. If any provision or part of a provision of these Legal Terms is
-            determined to be unlawful, void, or unenforceable, that provision or part of
-            the provision is deemed severable from these Legal Terms and does not affect
-            the validity and enforceability of any remaining provisions. There is no
-            joint venture, partnership, employment or agency relationship created between
-            you and us as a result of these Legal Terms or use of the Services. You agree
-            that these Legal Terms will not be construed against us by virtue of having
-            drafted them. You hereby waive any and all defenses you may have based on the
-            electronic form of these Legal Terms and the lack of signing by the parties
-            hereto to execute these Legal Terms.
-          </p>
-        </section>
-
-        <section id="contact" className="scroll-mt-20">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">
-            27. CONTACT US
-          </h2>
-          <p className="mb-4 leading-relaxed">
-            In order to resolve a complaint regarding the Services or to receive further
-            information regarding use of the Services, please contact us at:
-          </p>
-          <address className="not-italic leading-relaxed">
-            <p className="font-bold text-slate-900 notranslate">Backspaces</p>
-            <p className="notranslate">Ambedkar nagar Greater Noida</p>
-            <p>
-              <span className="notranslate">Greater Noida</span>,{' '}
-              <span className="notranslate">UTTAR PRADESH</span>{' '}
-              <span className="notranslate">201310</span>
-            </p>
-            <p className="notranslate mb-4">India</p>
-            <p>
-              <a
-                href="mailto:backspaces.devs@gmail.com"
-                className="text-blue-600 hover:underline"
-              >
-                backspaces.devs@gmail.com
-              </a>
-            </p>
-          </address>
-        </section>
       </div>
-    </main>
+    </>
   );
 }

@@ -65,7 +65,7 @@ const defaultSocialLinks = [
 
 const defaultLegalLinks = [
   { name: "Terms and Conditions", href: "/terms" },
-  { name: "Privacy Policy", href: "#" },
+  { name: "Privacy Policy", href: "/policy" },
 ];
 
 export const PageFooter = ({
