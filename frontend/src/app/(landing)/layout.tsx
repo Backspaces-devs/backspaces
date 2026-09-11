@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/ui/Navbar";
 import { PageFooter } from "@/components/ui/PageFooter";
+import { FAQ } from "@/components/ui/FAQ";
 
 export default function LandingLayout({
   children,
@@ -10,6 +11,12 @@ export default function LandingLayout({
     <>
       <Navbar />
       {children}
+
+      <FAQ
+        badge="FAQ"
+        heading="Got Questions?"
+        description="Everything you need to know about Backspaces before you dive in."
+      />
       <PageFooter
         logo={{
           url: "/",
