@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaDiscord, FaGithub } from "react-icons/fa";
 
 interface Footer7Props {
@@ -63,8 +64,8 @@ const defaultSocialLinks = [
 ];
 
 const defaultLegalLinks = [
-  { name: "Terms and Conditions", href: "#" },
-  { name: "Privacy Policy", href: "#" },
+  { name: "Terms and Conditions", href: "/terms" },
+  { name: "Privacy Policy", href: "/policy" },
 ];
 
 export const PageFooter = ({
