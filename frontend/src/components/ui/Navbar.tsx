@@ -61,6 +61,7 @@ export function Navbar() {
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
     { label: 'Discover', href: '/discover' },
+    { label: 'Contribute', href: '/contributor-space' },
   ];
 
   const loginButtonElement = (
