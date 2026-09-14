@@ -31,7 +31,7 @@ export default function signinLayout({
           {
             title: "Company",
             links: [
-              { name: "Careers", href: "#" },
+              { name: "Contribute", href: "#" },
               { name: "Contact", href: "#" },
             ],
           },

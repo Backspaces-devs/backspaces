@@ -45,7 +45,7 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
-      {/* LEFT SIDEBAR - 20% */}
+      {/* LEFT SIDEBAR */}
       <aside
         className={cn(
           "hidden lg:flex lg:w-[15%] flex-col h-full shrink-0",
@@ -139,8 +139,8 @@ export function DashboardShell({
         </div>
       )}
 
-      {/* MAIN SECTION - 70% */}
-      <main className="flex-1 lg:w-[75%] h-full flex flex-col overflow-hidden">
+      {/* MAIN SECTION */}
+      <main className="flex-1 lg:w-[70%] h-full flex flex-col overflow-hidden">
         {/* Top navbar inside main */}
         <div
           className={cn(
@@ -165,10 +165,10 @@ export function DashboardShell({
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
       </main>
 
-      {/* RIGHT SECTION - 10% */}
+      {/* RIGHT SECTION */}
       <aside
         className={cn(
-          "hidden xl:flex xl:w-[10%] h-full flex-col shrink-0 border-l overflow-y-auto p-3 gap-3",
+          "hidden xl:flex xl:w-[15%] h-full flex-col shrink-0 border-l overflow-y-auto p-3 gap-3",
           glass
         )}
       >

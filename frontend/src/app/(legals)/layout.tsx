@@ -32,7 +32,7 @@ export default function LandingLayout({
           {
             title: "Company",
             links: [
-              { name: "Careers", href: "#" },
+              { name: "Contribute", href: "#" },
               { name: "Contact", href: "#" },
             ],
           },
