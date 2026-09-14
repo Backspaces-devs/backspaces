@@ -439,7 +439,7 @@ export const SignInPage = ({ className }: { className?: string }) => {
       </div>
 
       {/* Main Content Card Container */}
-      <div className="relative z-10 flex flex-col flex-1 items-center justify-center p-4 sm:p-6 sm:pt-25">
+      <div className="relative z-10 flex flex-col flex-1 items-center justify-center p-4 sm:p-6 sm:pt-25 ">
         <div className="w-full max-w-md border border-[#333] bg-[#1f1f1f57] backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80">
           <AnimatePresence mode="wait">
             {step === "form" ? (
