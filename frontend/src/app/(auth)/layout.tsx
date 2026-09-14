@@ -1,16 +1,15 @@
 import { Navbar } from "@/components/ui/Navbar";
 import { PageFooter } from "@/components/ui/PageFooter";
+import { FAQ } from "@/components/ui/FAQ";
 
-export default function LandingLayout({
+export default function signinLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <>
-      <div className="mt-15">
-        <Navbar />
-      </div>
+      <Navbar />
       {children}
       <PageFooter
         logo={{
