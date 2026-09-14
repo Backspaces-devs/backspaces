@@ -48,7 +48,7 @@ export function DashboardShell({
       {/* LEFT SIDEBAR - 20% */}
       <aside
         className={cn(
-          "hidden lg:flex lg:w-[20%] flex-col h-full shrink-0",
+          "hidden lg:flex lg:w-[15%] flex-col h-full shrink-0",
           glass,
           "border-r"
         )}
@@ -140,7 +140,7 @@ export function DashboardShell({
       )}
 
       {/* MAIN SECTION - 70% */}
-      <main className="flex-1 lg:w-[70%] h-full flex flex-col overflow-hidden">
+      <main className="flex-1 lg:w-[75%] h-full flex flex-col overflow-hidden">
         {/* Top navbar inside main */}
         <div
           className={cn(

@@ -157,4 +157,9 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
+  .recharts-wrapper:focus,
+  .recharts-wrapper *:focus,
+  .recharts-surface:focus {
+    outline: none !important;
+  }
 }

@@ -3,20 +3,20 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-const data = [
-  { day: "Mon", problems: 4 },
-  { day: "Tue", problems: 7 },
-  { day: "Wed", problems: 3 },
-  { day: "Thu", problems: 9 },
-  { day: "Fri", problems: 6 },
-  { day: "Sat", problems: 12 },
-  { day: "Sun", problems: 8 },
-];
+interface ActivityDataPoint {
+  day: string;
+  problems: number;
+}
 
-export function ActivityChart() {
+interface ActivityChartProps {
+  data: ActivityDataPoint[];
+  title?: string;
+}
+
+export function ActivityChart({ data, title = "Weekly Activity" }: ActivityChartProps) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 sm:p-6 h-[300px] sm:h-[340px] flex flex-col">
-      <h3 className="text-sm sm:text-base font-semibold mb-4">Weekly Activity</h3>
+      <h3 className="text-sm sm:text-base font-semibold mb-4">{title}</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>

@@ -3,16 +3,21 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-const data = [
-  { name: "Easy", value: 145, color: "#4ade80" },
-  { name: "Medium", value: 98, color: "#facc15" },
-  { name: "Hard", value: 32, color: "#f87171" },
-];
+interface DifficultyDataPoint {
+  name: string;
+  value: number;
+  color: string;
+}
 
-export function DifficultyChart() {
+interface DifficultyChartProps {
+  data: DifficultyDataPoint[];
+  title?: string;
+}
+
+export function DifficultyChart({ data, title = "Problems by Difficulty" }: DifficultyChartProps) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 sm:p-6 h-[300px] sm:h-[340px] flex flex-col">
-      <h3 className="text-sm sm:text-base font-semibold mb-2">Problems by Difficulty</h3>
+      <h3 className="text-sm sm:text-base font-semibold mb-2">{title}</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

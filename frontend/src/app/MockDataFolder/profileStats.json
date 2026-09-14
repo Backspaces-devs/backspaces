@@ -1,0 +1,49 @@
+{
+  "platforms": [
+    {
+      "name": "LeetCode",
+      "logo": "/icons/leetcode.svg",
+      "stat": "0075",
+      "statLabel": "Problems Solved",
+      "rank": "Top 12%",
+      "color": "#FFA116"
+    },
+    {
+      "name": "Codeforces",
+      "logo": "/icons/codeforces.svg",
+      "stat": "1542",
+      "statLabel": "Rating · Specialist",
+      "rank": "#48,201",
+      "color": "#1F8ACB"
+    },
+    {
+      "name": "GitHub",
+      "logo": "/icons/github.svg",
+      "stat": "412",
+      "statLabel": "Contributions this year",
+      "color": "#F5F5F5"
+    },
+    {
+      "name": "CodeChef",
+      "logo": "/icons/codechef.svg",
+      "stat": "1789",
+      "statLabel": "Rating · 3 Star",
+      "rank": "#8,320",
+      "color": "#5B4638"
+    },
+    {
+      "name": "HackerRank",
+      "logo": "/icons/hackerrank.svg",
+      "stat": "5",
+      "statLabel": "Badges Earned",
+      "color": "#00EA64"
+    },
+    {
+      "name": "GeeksforGeeks",
+      "logo": "/icons/gfg.svg",
+      "stat": "310",
+      "statLabel": "Problems Solved",
+      "color": "#2F8D46"
+    }
+  ]
+}
