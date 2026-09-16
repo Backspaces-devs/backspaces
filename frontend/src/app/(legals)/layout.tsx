@@ -27,12 +27,13 @@ export default function LandingLayout({
               { name: "About", href: "/about" },
               { name: "Discover", href: "/discover" },
               { name: "Home", href: "/" },
+              { name: "Contribute", href: "/contributor-space" },
             ],
           },
           {
             title: "Company",
             links: [
-              { name: "Contribute", href: "#" },
+              { name: "Contribute", href: "/contributor-space" },
               { name: "Contact", href: "#" },
             ],
           },
