@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X, Bell, Settings, LayoutDashboard, Compass, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +25,8 @@ interface DashboardShellProps {
 }
 
 const defaultNavItems: NavItem[] = [
+  { label: "News", href: "/news", icon: <Compass className="size-5" /> },
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
-  { label: "Explore", href: "/dashboard/explore", icon: <Compass className="size-5" /> },
   { label: "Profile", href: "/dashboard/profile", icon: <User className="size-5" /> },
 ];
 
@@ -39,6 +40,15 @@ export function DashboardShell({
   rightPanel,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  const getPageTitle = () => {
+    const match = navItems.find((item) => item.href === pathname);
+    if (match) return match.label;
+    // fallback: capitalize the last segment of the path
+    const segment = pathname.split("/").filter(Boolean).pop();
+    return segment ? segment.charAt(0).toUpperCase() + segment.slice(1) : "Dashboard";
+  };
 
   const glass =
     "bg-white/5 backdrop-blur-md border border-white/10 dark:bg-white/5 dark:border-white/10 light:bg-black/5 light:border-black/10";
@@ -155,7 +165,11 @@ export function DashboardShell({
           >
             <Menu className="size-5" />
           </button>
-          <div className="flex-1 flex items-center">{topBarContent}</div>
+          <div className="flex-1 flex items-center px-2">
+            <h2 className="text-sm sm:text-base font-semibold">
+              {topBarContent ?? getPageTitle()}
+            </h2>
+          </div>
           <Link href="/dashboard/notifications" className="lg:hidden" aria-label="Notifications">
             <Bell className="size-5 text-muted-foreground" />
           </Link>
