@@ -27,7 +27,7 @@ interface DashboardShellProps {
 const defaultNavItems: NavItem[] = [
   { label: "News", href: "/news", icon: <Compass className="size-5" /> },
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
-  { label: "Profile", href: "/dashboard/profile", icon: <User className="size-5" /> },
+  { label: "Article", href: "/article", icon: <User className="size-5" /> },
 ];
 
 export function DashboardShell({
