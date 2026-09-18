@@ -1,0 +1,14 @@
+# secrets — never commit your real API keys
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# saved API responses (optional — remove this line if you WANT to track them)
+news_api_responses/
+
+# editor
+.vscode/
