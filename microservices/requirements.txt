@@ -1,6 +1,8 @@
 fastapi
 uvicorn[standard]
-feedparser
-requests
 pydantic
+feedparser
+httpx
+python-dotenv
 sentence-transformers
+motor

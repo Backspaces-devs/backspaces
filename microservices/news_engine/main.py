@@ -4,12 +4,14 @@ news_engine — Backspaces news microservice.
 Pipeline (same sources & reference topics as the original script):
 
   1. Fetch   — RSS feeds (TechCrunch, The Verge, Ars Technica, Wired, InfoQ),
-               Hacker News top stories, Dev.to articles (4 tags)
+               Hacker News top stories, Dev.to articles (configurable tags)
   2. Dedup   — fuzzy title matching; keeps earliest copy + backfills fields
   3. Score   — sentence-embedding similarity (all-MiniLM-L6-v2) against the
-               4 reference topics; keep items at/above THRESHOLD (0.35)
+               reference topics; keep items at/above THRESHOLD
   4. Shape   — final article objects, sorted by relevance
-  5. Save    — data/response.json (overwritten on each run)
+  5. Save    — data/response.json (overwritten on each run) and, if
+               MONGODB_URI is configured, the releventNews MongoDB
+               collection (also overwritten on each run)
 
 Run it two ways:
 
@@ -23,12 +25,18 @@ Run it two ways:
 
 No API keys required — all sources are public.
 First run downloads the MiniLM model (~90 MB), afterwards it's cached.
+
+Configuration is loaded from environment variables / a .env file
+(see .env.example). All fetches (RSS, Hacker News, Dev.to) run
+concurrently using httpx.AsyncClient for lower end-to-end latency.
 """
 
 import asyncio
 import calendar
 import html as html_mod
 import json
+import logging
+import os
 import re
 import sys
 import time
@@ -38,16 +46,51 @@ from pathlib import Path
 from typing import Optional
 
 import feedparser
-import requests
-from fastapi import FastAPI, Query
+import httpx
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Query
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
 
 # ---------------- config ----------------
 
+load_dotenv()  # reads a .env file in the working directory, if present
+
 SERVICE_DIR = Path(__file__).resolve().parent
 
-RSS_FEEDS = {
+
+def _env_list(name: str, default: list[str]) -> list[str]:
+    raw = os.getenv(name)
+    if not raw:
+        return default
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+def _env_list_piped(name: str, default: list[str]) -> list[str]:
+    """Like _env_list, but splits on '|' instead of ','. Use this for values
+    that may themselves contain commas (e.g. free-text topic descriptions)."""
+    raw = os.getenv(name)
+    if not raw:
+        return default
+    return [item.strip() for item in raw.split("|") if item.strip()]
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+DEFAULT_RSS_FEEDS = {
     "TechCrunch": "https://techcrunch.com/feed/",
     "The Verge": "https://www.theverge.com/rss/index.xml",
     "Ars Technica": "https://feeds.arstechnica.com/arstechnica/index",
@@ -55,38 +98,75 @@ RSS_FEEDS = {
     "InfoQ": "https://feed.infoq.com/",
 }
 
-DEV_TO_TAGS = ["machinelearning", "ai", "programming", "webdev"]
-DEV_TO_PER_TAG = 15
+# RSS_FEEDS can be overridden via env as "Name1|url1,Name2|url2"
+_rss_env = os.getenv("RSS_FEEDS")
+if _rss_env:
+    RSS_FEEDS = dict(pair.split("|", 1) for pair in _rss_env.split(",") if "|" in pair)
+else:
+    RSS_FEEDS = DEFAULT_RSS_FEEDS
 
-HN_BASE = "https://hacker-news.firebaseio.com/v0"
-HN_LIMIT = 30
+DEV_TO_TAGS = _env_list("DEV_TO_TAGS", ["machinelearning", "ai", "programming", "webdev"])
+DEV_TO_PER_TAG = _env_int("DEV_TO_PER_TAG", 15)
 
-REFERENCE_TOPICS = [
+HN_BASE = os.getenv("HN_BASE", "https://hacker-news.firebaseio.com/v0")
+HN_LIMIT = _env_int("HN_LIMIT", 30)
+HN_CONCURRENCY = _env_int("HN_CONCURRENCY", 10)  # simultaneous HN item requests
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("news_engine")
+
+_DEFAULT_REFERENCE_TOPICS = [
     "machine learning models and AI research",
     "new programming languages, frameworks, and developer tools",
     "startup funding and tech industry news",
     "software engineering best practices",
 ]
-
-# Human-readable label for each reference topic (index-aligned). The topic an
-# article matches most strongly becomes its `category`.
-TOPIC_CATEGORIES = [
+_DEFAULT_TOPIC_CATEGORIES = [
     "AI & ML",
     "Dev Tools",
     "Industry",
     "Engineering",
 ]
 
-MODEL_NAME = "all-MiniLM-L6-v2"
-THRESHOLD = 0.35  # raise for stricter filtering, lower to keep more
+# Piped ('|'), not comma-separated — topic text itself may contain commas
+# (e.g. "new languages, frameworks, and tools"), which would otherwise split
+# a single topic into several and desync it from TOPIC_CATEGORIES.
+REFERENCE_TOPICS = _env_list_piped("REFERENCE_TOPICS", _DEFAULT_REFERENCE_TOPICS)
+TOPIC_CATEGORIES = _env_list_piped("TOPIC_CATEGORIES", _DEFAULT_TOPIC_CATEGORIES)
 
-REQUEST_TIMEOUT = 10  # seconds, per HTTP request
-MAX_ITEMS = 50        # default size of the saved feed
-CACHE_TTL = 300       # seconds, in-memory cache (API mode only)
+if len(REFERENCE_TOPICS) != len(TOPIC_CATEGORIES):
+    logger.error(
+        "REFERENCE_TOPICS (%d items) and TOPIC_CATEGORIES (%d items) must be "
+        "the same length — falling back to defaults for both. Check your "
+        ".env: use '|' to separate topics, not ','.",
+        len(REFERENCE_TOPICS), len(TOPIC_CATEGORIES),
+    )
+    REFERENCE_TOPICS = _DEFAULT_REFERENCE_TOPICS
+    TOPIC_CATEGORIES = _DEFAULT_TOPIC_CATEGORIES
+
+MODEL_NAME = os.getenv("MODEL_NAME", "all-MiniLM-L6-v2")
+THRESHOLD = _env_float("THRESHOLD", 0.35)  # raise for stricter filtering, lower to keep more
+
+REQUEST_TIMEOUT = _env_float("REQUEST_TIMEOUT", 10.0)  # seconds, per HTTP request
+MAX_ITEMS = _env_int("MAX_ITEMS", 50)                  # default size of the saved feed
+CACHE_TTL = _env_int("CACHE_TTL", 300)                 # seconds, in-memory cache (API mode only)
 DATA_DIR = SERVICE_DIR / "data"
 OUTPUT_FILE = DATA_DIR / "response.json"
 
-app = FastAPI(title="News Engine", version="3.0")
+# --- MongoDB (Atlas) ---
+# Full connection string from Atlas (Cluster0 > Connect > Drivers).
+# Leave empty to disable Mongo saving entirely (file save still happens).
+MONGODB_URI = os.getenv("MONGODB_URI", "")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "News")
+MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME", "releventNews")
+
+app = FastAPI(title="News Engine", version="3.1")
 
 # ---------------- models ----------------
 
@@ -148,12 +228,28 @@ def parse_iso_date(value: str) -> Optional[datetime]:
     except ValueError:
         return None
 
-# ---------------- fetchers (original sources & URLs) ----------------
+# ---------------- fetchers (async, run concurrently) ----------------
+#
+# RSS: feedparser has no native async API, so each feed is downloaded with
+# httpx (async, non-blocking) and then parsed with feedparser from the raw
+# bytes already in memory (fast, CPU-only — no additional network I/O).
+#
+# Hacker News: story IDs are fetched once, then individual stories are
+# fetched concurrently (bounded by HN_CONCURRENCY) instead of sequentially.
+#
+# Dev.to: one request per tag, all issued concurrently.
 
-def fetch_rss() -> list[RawArticle]:
-    items = []
-    for source, url in RSS_FEEDS.items():
-        feed = feedparser.parse(url)
+async def fetch_rss(client: httpx.AsyncClient) -> list[RawArticle]:
+    async def fetch_one(source: str, url: str) -> list[RawArticle]:
+        items = []
+        try:
+            resp = await client.get(url, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            feed = feedparser.parse(resp.content)
+        except Exception as e:
+            logger.warning("RSS fetch failed for %s (%s): %s", source, url, e)
+            return items
+
         for entry in feed.entries:
             summary = clean_html(entry.get("summary", ""))
             full_html = (entry.get("content") or [{}])[0].get("value", "")
@@ -168,19 +264,34 @@ def fetch_rss() -> list[RawArticle]:
                 author=entry.get("author") or None,
                 image=first_image_url(entry),
             ))
-    return items
+        return items
+
+    results = await asyncio.gather(*(fetch_one(src, url) for src, url in RSS_FEEDS.items()))
+    return [item for sublist in results for item in sublist]
 
 
-def fetch_hn() -> list[RawArticle]:
-    items = []
-    resp = requests.get(f"{HN_BASE}/topstories.json", timeout=REQUEST_TIMEOUT)
+async def fetch_hn(client: httpx.AsyncClient) -> list[RawArticle]:
+    resp = await client.get(f"{HN_BASE}/topstories.json", timeout=REQUEST_TIMEOUT)
+    resp.raise_for_status()
     top_ids = resp.json()[:HN_LIMIT]
-    for story_id in top_ids:
-        story = requests.get(f"{HN_BASE}/item/{story_id}.json", timeout=REQUEST_TIMEOUT).json()
+
+    semaphore = asyncio.Semaphore(HN_CONCURRENCY)
+
+    async def fetch_story(story_id: int) -> Optional[RawArticle]:
+        async with semaphore:
+            try:
+                r = await client.get(f"{HN_BASE}/item/{story_id}.json", timeout=REQUEST_TIMEOUT)
+                r.raise_for_status()
+                story = r.json()
+            except Exception as e:
+                logger.warning("HN item %s failed: %s", story_id, e)
+                return None
+
         if not story or story.get("type") != "story":
-            continue
+            return None
+
         text = clean_html(story.get("text", ""))
-        items.append(RawArticle(
+        return RawArticle(
             title=story.get("title", ""),
             source="Hacker News",
             url=story.get("url", f"https://news.ycombinator.com/item?id={story_id}"),
@@ -190,19 +301,28 @@ def fetch_hn() -> list[RawArticle]:
             author=story.get("by") or None,
             image=None,
             signal=story.get("score", 0),
-        ))
-        time.sleep(0.05)  # be polite to the HN API (as before)
-    return items
-
-
-def fetch_devto() -> list[RawArticle]:
-    items = []
-    for tag in DEV_TO_TAGS:
-        resp = requests.get(
-            f"https://dev.to/api/articles?tag={tag}&per_page={DEV_TO_PER_TAG}",
-            timeout=REQUEST_TIMEOUT,
         )
-        for article in resp.json():
+
+    results = await asyncio.gather(*(fetch_story(sid) for sid in top_ids))
+    return [item for item in results if item is not None]
+
+
+async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
+    async def fetch_tag(tag: str) -> list[RawArticle]:
+        items = []
+        try:
+            resp = await client.get(
+                "https://dev.to/api/articles",
+                params={"tag": tag, "per_page": DEV_TO_PER_TAG},
+                timeout=REQUEST_TIMEOUT,
+            )
+            resp.raise_for_status()
+            articles = resp.json()
+        except Exception as e:
+            logger.warning("Dev.to fetch failed for tag %s: %s", tag, e)
+            return items
+
+        for article in articles:
             description = article.get("description") or None
             items.append(RawArticle(
                 title=article.get("title", ""),
@@ -215,7 +335,10 @@ def fetch_devto() -> list[RawArticle]:
                 image=article.get("cover_image") or None,
                 signal=article.get("positive_reactions_count", 0),
             ))
-    return items
+        return items
+
+    results = await asyncio.gather(*(fetch_tag(tag) for tag in DEV_TO_TAGS))
+    return [item for sublist in results for item in sublist]
 
 
 FETCHERS = [fetch_rss, fetch_hn, fetch_devto]
@@ -264,7 +387,7 @@ def get_model() -> SentenceTransformer:
     """Load the embedding model once per process."""
     global _model
     if _model is None:
-        print(f"news_engine: loading model {MODEL_NAME} (first run downloads it) ...")
+        logger.info("Loading model %s (first run downloads it) ...", MODEL_NAME)
         _model = SentenceTransformer(MODEL_NAME)
     return _model
 
@@ -340,24 +463,34 @@ def to_final_article(idx: int, raw: RawArticle) -> Article:
 
 # ---------------- pipeline ----------------
 
-def run_news_pipeline(limit: int = MAX_ITEMS) -> list[Article]:
+async def run_news_pipeline_async(limit: int = MAX_ITEMS) -> list[Article]:
     items: list[RawArticle] = []
-    for fetcher in FETCHERS:
-        try:
-            fetched = fetcher()
-            print(f"news_engine: {fetcher.__name__} -> {len(fetched)} items")
-            items += fetched
-        except Exception as e:  # one dead source must not kill the run
-            print(f"news_engine: {fetcher.__name__} failed — {e}")
+    async with httpx.AsyncClient(headers={"User-Agent": "news-engine/3.1"}) as client:
+        results = await asyncio.gather(
+            *(fetcher(client) for fetcher in FETCHERS),
+            return_exceptions=True,
+        )
 
-    print(f"news_engine: total fetched: {len(items)}")
+    for fetcher, result in zip(FETCHERS, results):
+        if isinstance(result, Exception):
+            logger.error("%s failed entirely: %s", fetcher.__name__, result)
+            continue
+        logger.info("%s -> %d items", fetcher.__name__, len(result))
+        items += result
+
+    logger.info("Total fetched: %d", len(items))
     items = dedup_articles(items)
 
     kept = score_items(items)
     kept.sort(key=lambda x: x.relevance, reverse=True)
-    print(f"news_engine: kept {len(kept)} of {len(items)} items above threshold {THRESHOLD}")
+    logger.info("Kept %d of %d items above threshold %.2f", len(kept), len(items), THRESHOLD)
 
     return [to_final_article(i + 1, item) for i, item in enumerate(kept[:limit])]
+
+
+def run_news_pipeline(limit: int = MAX_ITEMS) -> list[Article]:
+    """Sync wrapper — used by script mode (`python main.py`)."""
+    return asyncio.run(run_news_pipeline_async(limit))
 
 # ---------------- persistence ----------------
 
@@ -367,6 +500,60 @@ def save_response(articles: list[Article]) -> Path:
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump([a.model_dump() for a in articles], f, indent=2, ensure_ascii=False)
     return OUTPUT_FILE
+
+# ---------------- MongoDB (Atlas) persistence ----------------
+
+_mongo_client: Optional[AsyncIOMotorClient] = None
+
+
+def get_mongo_client() -> AsyncIOMotorClient:
+    """Lazily create a single shared Motor client for the process lifetime."""
+    global _mongo_client
+    if _mongo_client is None:
+        if not MONGODB_URI:
+            raise RuntimeError(
+                "MONGODB_URI is not set. Add it to your .env — see .env.example."
+            )
+        _mongo_client = AsyncIOMotorClient(MONGODB_URI)
+    return _mongo_client
+
+
+async def save_to_mongo(articles: list[Article]) -> int:
+    """Replace the contents of the releventNews collection with this run's
+    articles (mirrors the overwrite-on-each-run behaviour of response.json).
+    Returns the number of documents written. No-op (with a warning) if
+    MONGODB_URI isn't configured, so Mongo saving is fully optional."""
+    if not MONGODB_URI:
+        logger.warning("MONGODB_URI not set — skipping MongoDB save.")
+        return 0
+
+    client = get_mongo_client()
+    collection = client[MONGO_DB_NAME][MONGO_COLLECTION_NAME]
+
+    docs = [a.model_dump() for a in articles]
+    for doc in docs:
+        doc["_id"] = doc["id"]  # stable id, avoids duplicate-key errors on rerun
+
+    try:
+        await collection.delete_many({})
+        if docs:
+            await collection.insert_many(docs)
+    except Exception as e:
+        logger.error("MongoDB save failed: %s", e)
+        return 0
+
+    logger.info(
+        "Saved %d articles to MongoDB (%s.%s)",
+        len(docs), MONGO_DB_NAME, MONGO_COLLECTION_NAME,
+    )
+    return len(docs)
+
+
+async def close_mongo_client() -> None:
+    global _mongo_client
+    if _mongo_client is not None:
+        _mongo_client.close()
+        _mongo_client = None
 
 # ---------------- in-memory cache (API mode only) ----------------
 
@@ -392,14 +579,13 @@ async def get_news(limit: int = Query(MAX_ITEMS, le=100, description="Max articl
     if cached:
         return cached
 
-    # Pipeline is sync (feedparser/requests) — run it off the event loop.
-    final = await asyncio.to_thread(run_news_pipeline, limit)
+    final = await run_news_pipeline_async(limit)
     if not final:
-        from fastapi import HTTPException
         raise HTTPException(502, "No sources returned results (check your internet connection)")
 
     set_cached(cache_key, final)
     save_response(final)
+    await save_to_mongo(final)
     return final
 
 
@@ -410,16 +596,32 @@ async def health():
         "sources": {"rss_feeds": list(RSS_FEEDS.keys()), "hacker_news": f"top {HN_LIMIT}", "dev_to_tags": DEV_TO_TAGS},
         "model": MODEL_NAME,
         "threshold": THRESHOLD,
+        "mongo_configured": bool(MONGODB_URI),
     }
+
+
+@app.on_event("shutdown")
+async def _on_shutdown():
+    await close_mongo_client()
 
 # ---------------- script mode ----------------
 # `python main.py` — fetches, scores, and saves data/response.json.
 
-if __name__ == "__main__":
-    print("news_engine: fetching feeds ...")
-    final = run_news_pipeline()
+# ---------------- script mode ----------------
+# `python main.py` — fetches, scores, saves data/response.json, and (if
+# MONGODB_URI is set) writes the same articles to the releventNews collection.
+
+async def _script_main() -> None:
+    logger.info("Fetching feeds ...")
+    final = await run_news_pipeline_async(MAX_ITEMS)
     if not final:
-        print("news_engine: failed — no items passed the filter (check sources / threshold)")
+        logger.error("Failed — no items passed the filter (check sources / threshold)")
         sys.exit(1)
     path = save_response(final)
-    print(f"news_engine: saved {len(final)} articles to {path}")
+    logger.info("Saved %d articles to %s", len(final), path)
+    await save_to_mongo(final)
+    await close_mongo_client()
+
+
+if __name__ == "__main__":
+    asyncio.run(_script_main())
