@@ -1,23 +1,78 @@
+// src/components/ui/PageFooter.tsx - FIXES TS2322 BUILD ERROR
+// Accepts props (logo, sections, etc) but also works without them
 import Link from "next/link";
 import { FaGithub, FaInstagram, FaDiscord, FaTwitter } from "react-icons/fa";
+import React from "react";
 
-export const PageFooter = () => {
-  const socials = [
-    { label: "GitHub", href: "https://github.com/Backspaces-devs/backspaces", Icon: FaGithub },
-    { label: "Instagram", href: "https://www.instagram.com/bckspaces/", Icon: FaInstagram },
-    { label: "Discord", href: "https://discord.gg/qQ5yvgB2N8", Icon: FaDiscord },
-    { label: "Twitter", href: "https://x.com/Backspaces_devs", Icon: FaTwitter },
-  ];
+interface Logo {
+  url: string;
+  src: string;
+  alt: string;
+  title: string;
+}
 
-  const logoElement = (
-    <div className="w-8 h-8 rounded-full overflow-hidden border-0 border-gray-300">
-      <img
-        src="/logo.svg"
-        alt="Logo"
-        className="w-full h-full object-cover rounded-full border-2 border-blue-500"
-      />
-    </div>
-  )
+interface FooterLink {
+  name: string;
+  href: string;
+}
+
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
+
+interface SocialLink {
+  icon?: React.ReactElement;
+  Icon?: React.ComponentType<{ className?: string }>;
+  href: string;
+  label: string;
+}
+
+interface FooterProps {
+  logo?: Logo;
+  sections?: FooterSection[];
+  description?: string;
+  socialLinks?: SocialLink[] | any[]; // any[] to allow never[] from TS
+  copyright?: string;
+  legalLinks?: FooterLink[];
+}
+
+// Defaults - Backspaces
+const defaultLogo: Logo = {
+  url: "/",
+  src: "https://cdn.21st.dev/assets/mirror/31/312257931df7cfb368e5050011630292d548b932658ebb815c426223f580d172.svg",
+  alt: "Backspaces logo",
+  title: "Backspaces",
+};
+
+const defaultSections: FooterSection[] = [
+  { title: "Explore", links: [{ name: "About", href: "/about" }, { name: "Discover", href: "/discover" }, { name: "Home", href: "/" }, { name: "Contribute", href: "/contribute" }] },
+  { title: "Company", links: [{ name: "Contribute", href: "/contribute" }, { name: "Contact", href: "/contact" }] },
+  { title: "Resources", links: [{ name: "Help", href: "/help" }, { name: "Privacy", href: "/privacy" }] },
+];
+
+const defaultSocials: SocialLink[] = [
+  { Icon: FaGithub, href: "https://github.com/Backspaces-devs/backspaces", label: "GitHub" },
+  { Icon: FaInstagram, href: "https://www.instagram.com/bckspaces/", label: "Instagram" },
+  { Icon: FaDiscord, href: "https://discord.gg/qQ5yvgB2N8", label: "Discord" },
+  { Icon: FaTwitter, href: "https://x.com/Backspaces_devs", label: "Twitter" },
+];
+
+const defaultLegal = [
+  { name: "Terms and Conditions", href: "/terms" },
+  { name: "Privacy Policy", href: "/policy" },
+];
+
+export const PageFooter = ({
+  logo = defaultLogo,
+  sections = defaultSections,
+  description = "A dev space built for students and developers eager to code.",
+  socialLinks = defaultSocials,
+  copyright = "© 2026 Backspaces. All rights reserved.",
+  legalLinks = defaultLegal,
+}: FooterProps) => {
+  // If socialLinks is empty array (never[]), use defaults
+  const socialsToShow = socialLinks && socialLinks.length > 0 ? socialLinks : defaultSocials;
 
   return (
     <footer className="w-full bg-[#0a0a0a] border-t border-white/[0.06]">
@@ -25,69 +80,55 @@ export const PageFooter = () => {
         <div className="flex flex-col lg:flex-row justify-between gap-10">
           <div className="flex flex-col gap-4 max-w-sm">
             <div className="flex items-center gap-2.5">
-              <div className="size-8 rounded-full border border-blue-500/50 flex items-center justify-center text-white font-bold text-sm">
-                <a href="/">
-                  <div className="flex items-center ">
-                    {logoElement}
-                  </div>
-                </a>
-              </div>
-              <span className="text-[18px] font-semibold text-white">Backspaces</span>
+              <Link href={logo.url}>
+                <img src={logo.src} alt={logo.alt} className="h-8 w-8 rounded-full border border-blue-500/50 object-cover" />
+              </Link>
+              <span className="text-[18px] font-semibold text-white">{logo.title}</span>
             </div>
-            <p className="text-[13px] text-white/50 leading-relaxed">
-              A dev space built for students and developers eager to code.
-            </p>
+            <p className="text-[13px] text-white/50 leading-relaxed">{description}</p>
 
-            {/* SOCIALS - VISIBLE WHITE CIRCLES */}
             <div className="flex items-center gap-3 mt-3">
-              {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label}
-                  className="size-9 flex items-center justify-center rounded-full  text-white hover:bg-white/90 hover:text-black transition-colors"
-                >
-                  <s.Icon className="size-[20px]" />
-                </a>
-              ))}
+              {socialsToShow.map((s: any) => {
+                const IconComp = s.Icon;
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="size-9 flex items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-colors"
+                  >
+                    {s.icon ? s.icon : IconComp ? <IconComp className="size-[18px]" /> : null}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
           <div className="flex gap-12 sm:gap-20">
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Explore</h4>
-              <ul className="space-y-2.5 text-[13px] text-white/50">
-                <li><Link href="/about" className="hover:text-white">About</Link></li>
-                <li><Link href="/discover" className="hover:text-white">Discover</Link></li>
-                <li><Link href="/" className="hover:text-white">Home</Link></li>
-                <li><Link href="/contribute" className="hover:text-white">Contribute</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2.5 text-[13px] text-white/50">
-                <li><Link href="/contribute" className="hover:text-white">Contribute</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
-              <ul className="space-y-2.5 text-[13px] text-white/50">
-                <li><Link href="/help" className="hover:text-white">Help</Link></li>
-                <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
-              </ul>
-            </div>
+            {sections.map((section) => (
+              <div key={section.title}>
+                <h4 className="text-sm font-semibold text-white mb-4">{section.title}</h4>
+                <ul className="space-y-2.5 text-[13px] text-white/50">
+                  {section.links.map((link) => (
+                    <li key={link.name}>
+                      <Link href={link.href} className="hover:text-white">{link.name}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="h-px bg-white/[0.06] mt-12 mb-6" />
         <div className="flex flex-col sm:flex-row justify-between gap-3 text-[12px] text-white/40">
-          <p>© 2026 Backspaces. All rights reserved.</p>
+          <p>{copyright}</p>
           <div className="flex gap-4">
-            <Link href="/terms" className="hover:text-white/70">Terms and Conditions</Link>
-            <Link href="/policy" className="hover:text-white/70">Privacy Policy</Link>
+            {legalLinks.map((l) => (
+              <Link key={l.name} href={l.href} className="hover:text-white/70">{l.name}</Link>
+            ))}
           </div>
         </div>
       </div>
@@ -95,5 +136,4 @@ export const PageFooter = () => {
   );
 };
 
-// Also export as default for flexibility
 export default PageFooter;
