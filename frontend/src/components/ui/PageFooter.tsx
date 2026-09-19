@@ -1,145 +1,99 @@
-import React from "react";
 import Link from "next/link";
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaDiscord, FaGithub } from "react-icons/fa";
+import { FaGithub, FaInstagram, FaDiscord, FaTwitter } from "react-icons/fa";
 
-interface Footer7Props {
-  logo?: {
-    url: string;
-    src: string;
-    alt: string;
-    title: string;
-  };
-  sections?: Array<{
-    title: string;
-    links: Array<{ name: string; href: string }>;
-  }>;
-  description?: string;
-  socialLinks?: Array<{
-    icon: React.ReactElement;
-    href: string;
-    label: string;
-  }>;
-  copyright?: string;
-  legalLinks?: Array<{
-    name: string;
-    href: string;
-  }>;
-}
+export const PageFooter = () => {
+  const socials = [
+    { label: "GitHub", href: "https://github.com/Backspaces-devs/backspaces", Icon: FaGithub },
+    { label: "Instagram", href: "https://www.instagram.com/bckspaces/", Icon: FaInstagram },
+    { label: "Discord", href: "https://discord.gg/qQ5yvgB2N8", Icon: FaDiscord },
+    { label: "Twitter", href: "https://x.com/Backspaces_devs", Icon: FaTwitter },
+  ];
 
-const defaultSections = [
-  {
-    title: "Product",
-    links: [
-      { name: "Overview", href: "#" },
-      { name: "Pricing", href: "#" },
-      { name: "Marketplace", href: "#" },
-      { name: "Features", href: "#" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About", href: "#" },
-      { name: "Team", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "Contribute", href: "#" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { name: "Help", href: "#" },
-      { name: "Sales", href: "#" },
-      { name: "Advertise", href: "#" },
-      { name: "Privacy", href: "#" },
-    ],
-  },
-];
+  const logoElement = (
+    <div className="w-8 h-8 rounded-full overflow-hidden border-0 border-gray-300">
+      <img
+        src="/logo.svg"
+        alt="Logo"
+        className="w-full h-full object-cover rounded-full border-2 border-blue-500"
+      />
+    </div>
+  )
 
-const defaultSocialLinks = [
-  { icon: <FaGithub className="size-5" />, href: "#", label: "GitHub" },
-  { icon: <FaDiscord className="size-5" />, href: "#", label: "Discord" },
-  { icon: <FaTwitter className="size-5" />, href: "#", label: "Twitter" },
-  { icon: <FaLinkedin className="size-5" />, href: "#", label: "LinkedIn" },
-];
-
-const defaultLegalLinks = [
-  { name: "Terms and Conditions", href: "/terms" },
-  { name: "Privacy Policy", href: "/policy" },
-];
-
-export const PageFooter = ({
-  logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://cdn.21st.dev/assets/mirror/31/312257931df7cfb368e5050011630292d548b932658ebb815c426223f580d172.svg",
-    alt: "logo",
-    title: "Shadcnblocks.com",
-  },
-  sections = defaultSections,
-  description = "A collection of components for your startup business or side project.",
-  socialLinks = defaultSocialLinks,
-  copyright = "© 2024 Shadcnblocks.com. All rights reserved.",
-  legalLinks = defaultLegalLinks,
-}: Footer7Props) => {
   return (
-    <section className="py-16 sm:py-24 lg:py-32 px-6 sm:px-10 lg:px-16">
-      <div className="container mx-auto">
-        <div className="flex w-full flex-col justify-between gap-8 sm:gap-10 lg:flex-row lg:items-start lg:text-left">
-          <div className="flex w-full flex-col justify-between gap-4 sm:gap-6 lg:items-start">
-            {/* Logo */}
-            <div className="flex items-center gap-2 lg:justify-start">
-              <a href={logo.url}>
-                <img
-                  src={logo.src}
-                  alt={logo.alt}
-                  title={logo.title}
-                  className="h-8 w-8 rounded-full border-2 border-blue-500 object-cover"
-                />
-              </a>
-              <h2 className="text-lg sm:text-xl font-semibold">{logo.title}</h2>
-            </div>
-            <p className="max-w-full sm:max-w-[80%] lg:max-w-[70%] text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {description}
-            </p>
-            <ul className="flex items-center space-x-5 sm:space-x-6 text-muted-foreground">
-              {socialLinks.map((social, idx) => (
-                <li key={idx} className="font-medium hover:text-primary">
-                  <a href={social.href} aria-label={social.label}>
-                    {social.icon}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:gap-20">
-            {sections.map((section, sectionIdx) => (
-              <div key={sectionIdx}>
-                <h3 className="mb-3 sm:mb-4 text-sm sm:text-base font-bold">{section.title}</h3>
-                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-muted-foreground">
-                  {section.links.map((link, linkIdx) => (
-                    <li
-                      key={linkIdx}
-                      className="font-medium hover:text-primary"
-                    >
-                      <a href={link.href}>{link.name}</a>
-                    </li>
-                  ))}
-                </ul>
+    <footer className="w-full bg-[#0a0a0a] border-t border-white/[0.06]">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-14">
+        <div className="flex flex-col lg:flex-row justify-between gap-10">
+          <div className="flex flex-col gap-4 max-w-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="size-8 rounded-full border border-blue-500/50 flex items-center justify-center text-white font-bold text-sm">
+                <a href="/">
+                  <div className="flex items-center ">
+                    {logoElement}
+                  </div>
+                </a>
               </div>
-            ))}
+              <span className="text-[18px] font-semibold text-white">Backspaces</span>
+            </div>
+            <p className="text-[13px] text-white/50 leading-relaxed">
+              A dev space built for students and developers eager to code.
+            </p>
+
+            {/* SOCIALS - VISIBLE WHITE CIRCLES */}
+            <div className="flex items-center gap-3 mt-3">
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="size-9 flex items-center justify-center rounded-full  text-white hover:bg-white/90 hover:text-black transition-colors"
+                >
+                  <s.Icon className="size-[20px]" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-12 sm:gap-20">
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Explore</h4>
+              <ul className="space-y-2.5 text-[13px] text-white/50">
+                <li><Link href="/about" className="hover:text-white">About</Link></li>
+                <li><Link href="/discover" className="hover:text-white">Discover</Link></li>
+                <li><Link href="/" className="hover:text-white">Home</Link></li>
+                <li><Link href="/contribute" className="hover:text-white">Contribute</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
+              <ul className="space-y-2.5 text-[13px] text-white/50">
+                <li><Link href="/contribute" className="hover:text-white">Contribute</Link></li>
+                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
+              <ul className="space-y-2.5 text-[13px] text-white/50">
+                <li><Link href="/help" className="hover:text-white">Help</Link></li>
+                <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div className="mt-6 sm:mt-8 flex flex-col justify-between gap-3 sm:gap-4 border-t py-6 sm:py-8 text-[11px] sm:text-xs font-medium text-muted-foreground md:flex-row md:items-center md:text-left">
-          <p className="order-2 lg:order-1">{copyright}</p>
-          <ul className="order-1 flex flex-col gap-2 sm:flex-row sm:gap-4 md:order-2">
-            {legalLinks.map((link, idx) => (
-              <li key={idx} className="hover:text-primary">
-                <a href={link.href}> {link.name}</a>
-              </li>
-            ))}
-          </ul>
+
+        <div className="h-px bg-white/[0.06] mt-12 mb-6" />
+        <div className="flex flex-col sm:flex-row justify-between gap-3 text-[12px] text-white/40">
+          <p>© 2026 Backspaces. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/terms" className="hover:text-white/70">Terms and Conditions</Link>
+            <Link href="/policy" className="hover:text-white/70">Privacy Policy</Link>
+          </div>
         </div>
       </div>
-    </section>
+    </footer>
   );
 };
+
+// Also export as default for flexibility
+export default PageFooter;
