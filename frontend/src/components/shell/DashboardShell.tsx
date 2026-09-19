@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Bell, Settings, LayoutDashboard, Compass, User } from "lucide-react";
+import { Menu, X, Bell, Settings, LayoutDashboard, Newspaper, Feather } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -25,9 +25,9 @@ interface DashboardShellProps {
 }
 
 const defaultNavItems: NavItem[] = [
-  { label: "News", href: "/news", icon: <Compass className="size-5" /> },
+  { label: "News", href: "/news", icon: <Newspaper className="size-5" /> },
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
-  { label: "Article", href: "/article", icon: <User className="size-5" /> },
+  { label: "Article", href: "/article", icon: <Feather className="size-5" /> },
 ];
 
 export function DashboardShell({
