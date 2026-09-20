@@ -1,9 +1,9 @@
 // src/components/shell/news/NewsDialog.tsx - FINAL per your spec
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { X, Globe, Clock, ExternalLink, ArrowRight } from "lucide-react";
+import { X, Globe, Clock, ArrowRight } from "lucide-react";
 
 interface NewsItem {
   id?: string | number;
@@ -40,14 +40,15 @@ function getReadTime(text: string) {
 }
 
 export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const [visible, setVisible] = useState(open);
 
   useEffect(() => {
     if (open) {
-      setVisible(true);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -62,7 +63,7 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onOpenChange]);
 
-  if (!mounted || !visible || !news) return null;
+  if (!mounted || (!open && !visible) || !news) return null;
 
   const sourceName = news.source || news.sourceName || getDomain(news.url);
   const fullText = news.content || news.description;
