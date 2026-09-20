@@ -1,14 +1,16 @@
-# secrets — never commit your real API keys
+# secrets — never commit real API keys
 .env
 
 # python
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
 venv/
 
-# saved API responses (optional — remove this line if you WANT to track them)
-news_api_responses/
+# generated microservice output (keep the folders via .gitkeep)
+microservices/*/data/*
+!microservices/*/data/.gitkeep
 
-# editor
+# editor / OS
 .vscode/
+.DS_Store
