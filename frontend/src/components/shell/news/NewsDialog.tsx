@@ -17,6 +17,7 @@ interface NewsItem {
   date?: string;
   author?: string;
   image?: string;
+  impact_score?: number;
 }
 
 interface NewsDialogProps {
@@ -67,7 +68,7 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
   const fullText = news.content || news.description;
   const readTime = getReadTime(fullText);
 
-  return createPortal(
+  return createPortal (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       {/* BACKDROP - matte glassmorphism blur */}
       <div
@@ -117,6 +118,17 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
               {readTime} min read
             </span>
           </div>
+
+          {/* Impact score - new row directly below category */}
+          {typeof news.impact_score === "number" && (
+            <div className="mt-2.5 flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[11px] font-medium text-white/60">
+                <span className="text-white/40">Impact</span>
+                <span className="text-white">{news.impact_score}</span>
+                <span className="text-white/30">/100</span>
+              </span>
+            </div>
+          )}
 
           {/* Source name - below category */}
           <div className="mt-3 flex items-center gap-1.5 text-[13px] text-white/60">
