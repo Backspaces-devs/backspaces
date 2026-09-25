@@ -1,9 +1,9 @@
 // src/components/shell/news/NewsDialog.tsx - FINAL per your spec
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Globe, Clock, ArrowRight } from "lucide-react";
+import { X, Globe, Clock, ExternalLink, ArrowRight } from "lucide-react";
 
 interface NewsItem {
   id?: string | number;
@@ -17,7 +17,6 @@ interface NewsItem {
   date?: string;
   author?: string;
   image?: string;
-  impact_score?: number;
 }
 
 interface NewsDialogProps {
@@ -40,15 +39,14 @@ function getReadTime(text: string) {
 }
 
 export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
-  const [visible, setVisible] = useState(open);
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (open) {
+      setVisible(true);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -63,13 +61,13 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onOpenChange]);
 
-  if (!mounted || (!open && !visible) || !news) return null;
+  if (!mounted || !visible || !news) return null;
 
   const sourceName = news.source || news.sourceName || getDomain(news.url);
   const fullText = news.content || news.description;
   const readTime = getReadTime(fullText);
 
-  return createPortal (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       {/* BACKDROP - matte glassmorphism blur */}
       <div
@@ -119,17 +117,6 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
               {readTime} min read
             </span>
           </div>
-
-          {/* Impact score - new row directly below category */}
-          {typeof news.impact_score === "number" && (
-            <div className="mt-2.5 flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[11px] font-medium text-white/60">
-                <span className="text-white/40">Impact</span>
-                <span className="text-white">{news.impact_score}</span>
-                <span className="text-white/30">/100</span>
-              </span>
-            </div>
-          )}
 
           {/* Source name - below category */}
           <div className="mt-3 flex items-center gap-1.5 text-[13px] text-white/60">

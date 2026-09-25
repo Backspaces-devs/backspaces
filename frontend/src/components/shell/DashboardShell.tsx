@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Bell, Settings, LayoutDashboard, Newspaper, Feather } from "lucide-react";
+import { Menu, X, Bell, Settings, LayoutDashboard, Newspaper, Feather, CodeXml, Trophy, ArrowLeft, Headset, MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -28,6 +28,10 @@ const defaultNavItems: NavItem[] = [
   { label: "News", href: "/news", icon: <Newspaper className="size-5" /> },
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
   { label: "Article", href: "/article", icon: <Feather className="size-5" /> },
+  { label: "Problem Solving", href: "/problemSolving", icon: <CodeXml className="size-5" /> },
+  { label: "Competitive Programming", href: "/contests", icon: <Trophy className="size-5" /> },
+  { label: "Connect", href: "/connect", icon: <Headset className="size-5" /> },
+  { label: "Feedback", href: "/feedback", icon: <MessagesSquare className="size-5" /> },
 ];
 
 export function DashboardShell({
@@ -64,9 +68,10 @@ export function DashboardShell({
         )}
       >
         {/* Top 10% - company name */}
-        <div className="h-[10%] min-h-[64px] flex items-center px-5 border-b border-white/10">
+        <div className="h-[7.55%] flex items-center px-5 border-b border-white/10">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.svg" alt={companyName} width={28} height={28} className="rounded-full" />
+          <ArrowLeft className="size-6 hover:text-blue-400 transition-colors duration-300" />
+            {/* <Image src="/logo.svg" alt={companyName} width={28} height={28} className="rounded-full" /> */}
             <span className="font-semibold text-lg tracking-tight">{companyName}</span>
           </Link>
         </div>
@@ -98,7 +103,7 @@ export function DashboardShell({
             <span className="text-sm font-medium truncate">{userName}</span>
           </div>
           <Link href="/dashboard/settings" aria-label="Settings">
-            <Settings className="size-4 text-muted-foreground hover:text-foreground transition-colors" />
+            <Settings className="size-5 text-muted-foreground hover:text-foreground transition-colors" />
           </Link>
         </div>
       </aside>
