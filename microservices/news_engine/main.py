@@ -11,7 +11,8 @@ Pipeline (same sources & reference topics as the original script):
   4. Shape   — final article objects, sorted by relevance
   5. Save    — data/response.json (overwritten on each run) and, if
                MONGODB_URI is configured, the releventNews MongoDB
-               collection (also overwritten on each run)
+               collection (upserted by URL — the library grows over
+               time; rerunning refreshes articles in place)
 
 Run it two ways:
 
@@ -50,6 +51,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ReplaceOne
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
 
@@ -181,6 +183,7 @@ class RawArticle(BaseModel):
     author: Optional[str] = None
     image: Optional[str] = None
     signal: Optional[int] = None       # HN points / Dev.to upvotes (RSS: none)
+    devto_id: Optional[int] = None     # Dev.to article id — needed to fetch the full body
     matched_sources: list[str] = []
     relevance: Optional[float] = None  # 0-1 cosine similarity, filled by scorer
     category: str = "General"
@@ -207,6 +210,25 @@ def clean_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text or "")
     text = html_mod.unescape(text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def markdown_to_text(md: str) -> str:
+    """Flatten markdown to readable plain text for the news dialog.
+
+    Keeps paragraph breaks (the dialog renders with whitespace-pre-wrap),
+    strips markdown syntax. No new dependencies."""
+    text = md or ""
+    text = re.sub(r"\A---\n.*?\n---\n?", "", text, flags=re.S)  # YAML frontmatter block
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)         # ![images](url)
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)     # [links](url) → label
+    text = re.sub(r"^```[^\n]*\n?", "", text, flags=re.M)    # code fences (code kept)
+    text = re.sub(r"^\s{0,3}#{1,6}\s*", "", text, flags=re.M)  # # headings
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)           # **bold**
+    text = re.sub(r"\*([^*\n]+)\*", r"\1", text)             # *italic*
+    text = re.sub(r"^\s*[-*+]\s+", "• ", text, flags=re.M)   # - bullets
+    text = re.sub(r"^>\s?", "", text, flags=re.M)            # > quotes
+    text = re.sub(r"\n{3,}", "\n\n", text)                   # collapse blank runs
+    return text.strip()
 
 
 def first_image_url(entry) -> Optional[str]:
@@ -334,6 +356,7 @@ async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
                 author=(article.get("user") or {}).get("name") or None,
                 image=article.get("cover_image") or None,
                 signal=article.get("positive_reactions_count", 0),
+                devto_id=article.get("id"),
             ))
         return items
 
@@ -342,6 +365,42 @@ async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
 
 
 FETCHERS = [fetch_rss, fetch_hn, fetch_devto]
+
+
+async def enrich_devto_content(kept: list[RawArticle]) -> None:
+    """Fetch full article bodies for the kept Dev.to items.
+
+    The tag listing endpoint never includes body_markdown — only the
+    single-article endpoint (dev.to/api/articles/{id}, also keyless) does —
+    so fetch it for the few items that survived scoring and replace the
+    teaser content. Runs after scoring so it costs ~1 request per kept
+    Dev.to article, not per fetched one. Failures keep the teaser."""
+    targets = [a for a in kept if a.source == "Dev.to" and a.devto_id]
+    if not targets:
+        return
+
+    sem = asyncio.Semaphore(5)  # be polite to the Dev.to API
+    done = 0
+
+    async def fetch_body(client: httpx.AsyncClient, article: RawArticle) -> None:
+        nonlocal done
+        try:
+            async with sem:
+                resp = await client.get(
+                    f"https://dev.to/api/articles/{article.devto_id}",
+                    timeout=REQUEST_TIMEOUT,
+                )
+            resp.raise_for_status()
+            body = (resp.json() or {}).get("body_markdown")
+            if body:
+                article.content = markdown_to_text(body)
+                done += 1
+        except Exception as e:
+            logger.warning("Dev.to body fetch failed (id %s): %s", article.devto_id, e)
+
+    async with httpx.AsyncClient(headers={"User-Agent": "news-engine/3.1"}) as client:
+        await asyncio.gather(*(fetch_body(client, a) for a in targets))
+    logger.info("Dev.to full bodies fetched: %d/%d", done, len(targets))
 
 # ---------------- dedup ----------------
 
@@ -485,7 +544,10 @@ async def run_news_pipeline_async(limit: int = MAX_ITEMS) -> list[Article]:
     kept.sort(key=lambda x: x.relevance, reverse=True)
     logger.info("Kept %d of %d items above threshold %.2f", len(kept), len(items), THRESHOLD)
 
-    return [to_final_article(i + 1, item) for i, item in enumerate(kept[:limit])]
+    top = kept[:limit]
+    await enrich_devto_content(top)
+
+    return [to_final_article(i + 1, item) for i, item in enumerate(top)]
 
 
 def run_news_pipeline(limit: int = MAX_ITEMS) -> list[Article]:
@@ -519,32 +581,89 @@ def get_mongo_client() -> AsyncIOMotorClient:
 
 
 async def save_to_mongo(articles: list[Article]) -> int:
-    """Replace the contents of the releventNews collection with this run's
-    articles (mirrors the overwrite-on-each-run behaviour of response.json).
-    Returns the number of documents written. No-op (with a warning) if
-    MONGODB_URI isn't configured, so Mongo saving is fully optional."""
+    """Upsert this run's articles into the releventNews collection.
+
+    The collection is the growing news library — articles from previous
+    runs are kept, nothing is deleted. An article whose URL is already in
+    the library gets its fields refreshed in place and keeps its numeric id
+    (so the full-body enrichment replaces old truncated teasers); genuinely
+    new articles receive fresh, ever-incrementing ids. No-op (with a
+    warning) if MONGODB_URI isn't configured, so Mongo saving is optional."""
     if not MONGODB_URI:
         logger.warning("MONGODB_URI not set — skipping MongoDB save.")
+        return 0
+
+    docs = [a.model_dump() for a in articles]
+    if not docs:
+        logger.warning("No articles this run — leaving Mongo untouched.")
         return 0
 
     client = get_mongo_client()
     collection = client[MONGO_DB_NAME][MONGO_COLLECTION_NAME]
 
-    docs = [a.model_dump() for a in articles]
+    # Self-heal: runs from older engine versions may have left duplicate `id`
+    # values (per-run numbering) or docs where _id != id. Keep the first doc of
+    # each duplicated id; push the extras (and the counter base) above both the
+    # max `id` field and the max numeric `_id`, so new ids can never collide
+    # with a legacy slot again. Runs only when duplicates exist.
+    dup_ids = [
+        g["_id"]
+        async for g in collection.aggregate([
+            {"$group": {"_id": "$id", "n": {"$sum": 1}}},
+            {"$match": {"n": {"$gt": 1}}},
+        ])
+    ]
+    if dup_ids:
+        top_id = await collection.find_one({}, sort=[("id", -1)], projection={"_id": 0, "id": 1})
+        top_oid = await collection.find_one({"_id": {"$type": "number"}}, sort=[("_id", -1)], projection={"_id": 1})
+        seq = max(top_id["id"] if top_id else 0, top_oid["_id"] if top_oid else 0) + 1
+        healed = 0
+        for dup in dup_ids:
+            first = True
+            async for d in collection.find({"id": dup}, {"_id": 1}).sort("_id", 1):
+                if first:
+                    first = False
+                    continue
+                await collection.update_one({"_id": d["_id"]}, {"$set": {"id": seq}})
+                seq += 1
+                healed += 1
+        logger.warning("Self-healed %d duplicate id value(s): %s", healed, dup_ids)
+
+    # Existing articles (by URL) keep their current ids.
+    urls = [d["url"] for d in docs]
+    existing = {
+        doc["url"]: doc["id"]
+        async for doc in collection.find({"url": {"$in": urls}}, {"_id": 0, "url": 1, "id": 1})
+    }
+
+    # New articles continue from the collection's current max id.
+    top = await collection.find_one({}, sort=[("id", -1)], projection={"_id": 0, "id": 1})
+    counter = (top["id"] if top else 0) + 1
+
+    ops = []
+    new = refreshed = 0
     for doc in docs:
-        doc["_id"] = doc["id"]  # stable id, avoids duplicate-key errors on rerun
+        doc_id = existing.get(doc["url"])
+        if doc_id is None:
+            doc_id = counter
+            counter += 1
+            new += 1
+        else:
+            refreshed += 1
+        doc["id"] = doc_id
+        doc["_id"] = doc_id  # _id mirrors id — keeps backend /api/news/:id routes working
+        ops.append(ReplaceOne({"_id": doc_id}, doc, upsert=True))
 
     try:
-        await collection.delete_many({})
-        if docs:
-            await collection.insert_many(docs)
+        await collection.bulk_write(ops, ordered=False)
     except Exception as e:
         logger.error("MongoDB save failed: %s", e)
         return 0
 
+    total = await collection.estimated_document_count()
     logger.info(
-        "Saved %d articles to MongoDB (%s.%s)",
-        len(docs), MONGO_DB_NAME, MONGO_COLLECTION_NAME,
+        "Saved to MongoDB (%s.%s): %d new, %d refreshed — library size %d (nothing deleted)",
+        MONGO_DB_NAME, MONGO_COLLECTION_NAME, new, refreshed, total,
     )
     return len(docs)
 

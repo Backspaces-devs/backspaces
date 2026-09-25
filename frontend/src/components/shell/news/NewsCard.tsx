@@ -15,7 +15,7 @@ export function NewsCard({ heading, category, description, view = "grid", source
   const meta = [source, date].filter(Boolean).join(" · ");
   if (view === "list") {
     return (
-      <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 w-full py-4 px-1 sm:px-2 border-b border-white/[0.08] last:border-b-0 hover:bg-white/[0.02] transition-colors group cursor-pointer">
+      <div onClick={onReadMore} className="flex flex-row items-center justify-between gap-3 sm:gap-4 w-full py-4 px-1 sm:px-2 border-b border-white/[0.08] last:border-b-0 hover:bg-white/[0.02] transition-colors group cursor-pointer">
         {/* Left */}
         <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
           <h3 className="font-medium text-[14px] sm:text-[15px] leading-snug truncate text-white/90 group-hover:text-white transition-colors">
@@ -47,8 +47,8 @@ export function NewsCard({ heading, category, description, view = "grid", source
   }
 
   // GRID MODE - keeps bg + border as before
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 hover:bg-white/[0.07] transition-colors w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] group">
+  return (<>
+    <div onClick={onReadMore} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 hover:bg-white/[0.07] transition-colors w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] group">
       <h3 className="font-semibold text-base leading-snug line-clamp-2">{heading}</h3>
       <div className="flex items-center gap-2">
         <span className="w-fit text-[11px] px-2 py-1 rounded-full bg-white/10 text-white/60">{category}</span>
@@ -60,5 +60,6 @@ export function NewsCard({ heading, category, description, view = "grid", source
         Read more <ArrowRight className="size-3.5" />
       </button>
     </div>
+  </>
   );
 }

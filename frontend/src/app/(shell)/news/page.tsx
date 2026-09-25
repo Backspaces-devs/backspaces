@@ -14,7 +14,7 @@ export interface NewsItem {
   id: string | number;
   heading: string;
   category: string;
-  description: string;
+  description: string | null; // null for sources without body text (e.g. Hacker News)
   url: string;
   source?: string;
   content?: string;
@@ -264,10 +264,10 @@ export default function NewsPage() {
           >
             {items.map((item) => (
               <NewsCard
-                key={item.id}
+                key={item.url} // url is the upsert key — unique per article; `id` isn't during legacy-data migration
                 heading={item.heading}
                 category={item.category}
-                description={item.description}
+                description={item.description || ""}
                 url={item.url}
                 view={view}
                 source={item.source}

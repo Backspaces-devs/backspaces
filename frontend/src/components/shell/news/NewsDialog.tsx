@@ -9,7 +9,7 @@ interface NewsItem {
   id?: string | number;
   heading: string;
   category: string;
-  description: string;
+  description?: string | null; // can be missing from the API (e.g. Hacker News)
   url: string;
   source?: string; // source name like "The Verge", "GitHub Blog"
   sourceName?: string;
@@ -66,8 +66,8 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
   if (!mounted || (!open && !visible) || !news) return null;
 
   const sourceName = news.source || news.sourceName || getDomain(news.url);
-  const fullText = news.content || news.description;
-  const readTime = getReadTime(fullText);
+  const fullText = news.content || news.description || "";
+  const readTime = fullText ? getReadTime(fullText) : null;
 
   return createPortal (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
@@ -113,11 +113,15 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
             <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.08] border border-white/[0.08] text-[11px] font-medium tracking-wide text-white/70">
               {news.category}
             </span>
-            <span className="hidden sm:block size-1 rounded-full bg-white/20" />
-            <span className="inline-flex items-center gap-1.5 text-[12px] text-white/50">
-              <Clock className="size-3" />
-              {readTime} min read
-            </span>
+            {readTime !== null && (
+              <>
+                <span className="hidden sm:block size-1 rounded-full bg-white/20" />
+                <span className="inline-flex items-center gap-1.5 text-[12px] text-white/50">
+                  <Clock className="size-3" />
+                  {readTime} min read
+                </span>
+              </>
+            )}
           </div>
 
           {/* Impact score - new row directly below category */}
@@ -160,13 +164,17 @@ export function NewsDialog({ open, onOpenChange, news }: NewsDialogProps) {
           )}
 
           <div className="prose prose-invert max-w-none">
-            <p className="text-[14px] sm:text-[15px] leading-[1.7] text-white/75 whitespace-pre-wrap">
-              {news.description}
-            </p>
-
-            {news.content && news.content !== news.description && (
-              <p className="mt-4 text-[14px] sm:text-[15px] leading-[1.7] text-white/65 whitespace-pre-wrap">
-                {news.content}
+            {fullText ? (
+              /* Show the fuller of content/description — never both, so
+                 the full body isn't preceded by its own truncated teaser. */
+              <p className="text-[14px] sm:text-[15px] leading-[1.7] text-white/75 whitespace-pre-wrap">
+                {news.content && news.content.length >= (news.description || "").length
+                  ? news.content
+                  : news.description}
+              </p>
+            ) : (
+              <p className="text-[14px] sm:text-[15px] leading-[1.7] text-white/40 italic">
+                This source doesn’t include the article text — read the full story via the source link below.
               </p>
             )}
           </div>
