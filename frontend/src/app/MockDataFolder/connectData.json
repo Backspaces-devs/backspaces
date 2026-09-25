@@ -1,6 +1,6 @@
 {
   "assignedMentor": {
-    "id": "mentor-primary",
+    "id": "mentor-1",
     "name": "Arjun Mehta",
     "role": "Senior Software Engineer",
     "company": "Razorpay",
@@ -17,7 +17,7 @@
   },
   "otherAssignedMentors": [
     {
-      "id": "mentor-2",
+      "id": "mentor-primary",
       "name": "Priya Sharma",
       "role": "Frontend Architect",
       "company": "Swiggy",

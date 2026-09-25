@@ -48,7 +48,7 @@ export function AssignedMentorCard({
       className={cn(
         "relative rounded-2xl border backdrop-blur-md p-5 sm:p-6 transition-all duration-300",
         isPrimary
-          ? "border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.07] via-white/[0.04] to-white/[0.02] shadow-[0_0_30px_-10px_rgba(16,185,129,0.15)]"
+          ? "border-[#4B6A9B]/30 bg-gradient-to-b from-[#4B6A9B]/[0.07] via-white/[0.04] to-white/[0.02] shadow-[0_0_30px_-10px_rgba(75,106,155,0.15)]"
           : "border-white/10 bg-white/5 hover:bg-white/[0.07]"
       )}
     >
@@ -57,28 +57,18 @@ export function AssignedMentorCard({
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase",
-              isPrimary
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] tracking-wide text-indigo-300 border border-indigo-500/30"
             )}
           >
-            <Sparkles className="size-3 text-emerald-400" />
             {isPrimary ? "Assigned Mentor" : "Active Session Mentor"}
           </span>
 
-          {mentor.status && (
+          {/* {mentor.status && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/[0.06] text-white/70 border border-white/10">
               <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
               {mentor.status}
             </span>
-          )}
-        </div>
-
-        {/* Zoom Integrated Pill */}
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-          <Video className="size-3" />
-          <span>Zoom 1:1 Live</span>
+          )} */}
         </div>
       </div>
 
@@ -91,12 +81,7 @@ export function AssignedMentorCard({
             alt={mentor.name}
             className="size-16 sm:size-20 rounded-2xl object-cover border-2 border-white/15 shadow-lg"
           />
-          <div
-            title="Verified Mentor"
-            className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-1 rounded-full shadow"
-          >
-            <ShieldCheck className="size-3.5 stroke-[2.5]" />
-          </div>
+
         </div>
 
         <div className="flex-1 min-w-0">
@@ -113,25 +98,13 @@ export function AssignedMentorCard({
             {mentor.role}
           </p>
 
-          <p className="text-xs text-white/50 mt-2 line-clamp-2 leading-relaxed">
-            {mentor.bio}
-          </p>
-
           <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-white/60">
             <span className="inline-flex items-center gap-1 font-semibold text-amber-400">
-              <Star className="size-3.5 fill-amber-400 text-amber-400" />
               {mentor.rating.toFixed(1)}
               <span className="text-white/40 font-normal">
-                ({mentor.totalSessions} sessions)
+                {mentor.totalSessions} sessions
               </span>
             </span>
-
-            {mentor.avgResponseTime && (
-              <span className="inline-flex items-center gap-1 text-white/50">
-                <Clock className="size-3.5 text-white/40" />
-                Responds {mentor.avgResponseTime}
-              </span>
-            )}
 
             {mentor.nextSlot && (
               <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
@@ -151,19 +124,15 @@ export function AssignedMentorCard({
         {mentor.tags.map((tag) => (
           <span
             key={tag}
-            className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/75 transition-colors"
+            className="text-[10px] py-0.5 rounded-full text-white/75 transition-colors"
           >
-            {tag}
+            {tag + " ,"}
           </span>
         ))}
       </div>
 
       {/* Actions */}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xs text-white/40 hidden sm:block">
-          Sessions are conducted over 1:1 Zoom with live screen share and code editor.
-        </div>
-
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           {onQuickDoubt && (
             <button
@@ -182,8 +151,7 @@ export function AssignedMentorCard({
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-white text-black hover:bg-white/90 text-xs font-semibold shadow-lg shadow-white/10 transition-all hover:scale-[1.02]"
           >
             <Video className="size-3.5 fill-black" />
-            <span>Schedule 1:1 on Zoom</span>
-            <ArrowRight className="size-3.5" />
+            <span>Schedule</span>
           </button>
         </div>
       </div>

@@ -166,17 +166,8 @@ export default function ConnectPage() {
       {/* Header section with CTAs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
-              <ShieldCheck className="size-3" />
-              1:1 Live Mentorship
-            </span>
-            <span className="text-xs text-white/40">
-              Powered by Zoom Real-time
-            </span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Mentor Connect &amp; Doubt Clinic
+            Mentor Connect
           </h1>
           <p className="text-xs sm:text-sm text-white/50 mt-1 max-w-2xl leading-relaxed">
             Stuck on a tricky DSA problem, code architecture, or interview prep?
@@ -189,7 +180,7 @@ export default function ConnectPage() {
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => setIsDirectoryOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-colors"
+            className="inline-flex items-center w-[75%] sm:w-[70%] gap-2 px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] sm:text-xs font-medium transition-colors"
           >
             <Search className="size-3.5 text-white/60" />
             <span>Search Mentor Database</span>
@@ -197,50 +188,49 @@ export default function ConnectPage() {
 
           <button
             onClick={() => handleOpenSchedule(assignedMentor)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black hover:bg-white/90 text-xs font-semibold shadow-lg shadow-white/10 transition-all hover:scale-[1.02]"
+            className=" items-center w-[25%] sm:w-[30%] gap-2 px-5 py-2.5 rounded-full bg-white text-black hover:bg-white/90 text-[10px] sm:text-xs font-semibold shadow-lg shadow-white/10 transition-all hover:scale-[1.02]"
           >
-            <Video className="size-3.5 fill-black" />
-            <span>Book 1:1 Session</span>
+            {/* <Video className="size-3.5 fill-black" /> */}
+            <span className="items-center">Schedule</span>
           </button>
         </div>
       </div>
 
       {/* Summary KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 flex flex-col justify-between">
-          <span className="text-xs text-white/40 font-medium">Assigned Mentor</span>
+          <span className="text-[10px] text-white/40 font-medium">Assigned Mentor</span>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-lg sm:text-xl font-bold text-white truncate">
+            <p className="text-xs sm:text-xl font-bold text-white">
               {assignedMentor.name}
             </p>
-            <span className="size-2 rounded-full bg-emerald-400" />
           </div>
-          <span className="text-[11px] text-emerald-400/80 mt-1">
+          <span className="text-[10px] text-emerald-400/80 mt-1">
             {assignedMentor.company}
           </span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 flex flex-col justify-between">
-          <span className="text-xs text-white/40 font-medium">Upcoming Sessions</span>
+          <span className="text-[10px] text-white/40 font-medium">Upcoming Sessions</span>
           <p className="text-xl sm:text-2xl font-bold text-white mt-1">
             {upcomingMeetings.length}
           </p>
-          <span className="text-[11px] text-blue-400 mt-1">
+          <span className="text-[10px] text-blue-400 mt-1">
             {upcomingMeetings.length > 0 ? "Next: Tomorrow 4:30 PM" : "Ready to book"}
           </span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 flex flex-col justify-between">
-          <span className="text-xs text-white/40 font-medium">Completed Sessions</span>
+          <span className="text-[10px] text-white/40 font-medium">Completed Sessions</span>
           <p className="text-xl sm:text-2xl font-bold text-white mt-1">
             {pastMeetings.length}
           </p>
-          <span className="text-[11px] text-white/40 mt-1">
-            Feedback &amp; Notes Logged
+          <span className="text-[10px] text-white/40 mt-1">
+            Feedback
           </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 flex flex-col justify-between">
+        {/* <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 flex flex-col justify-between">
           <span className="text-xs text-white/40 font-medium">Meeting Platform</span>
           <div className="flex items-center gap-1.5 mt-1">
             <Video className="size-4 text-blue-400" />
@@ -249,14 +239,14 @@ export default function ConnectPage() {
           <span className="text-[11px] text-white/40 mt-1">
             Auto Link &amp; Calendar Sync
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Assigned Mentors Section */}
       <div>
         <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2">
-            <Users className="size-4 text-emerald-400" />
+            <Users className="size-4 text-blue-500" />
             <h2 className="text-base sm:text-lg font-bold text-white">
               Your Mentors
             </h2>
@@ -266,7 +256,7 @@ export default function ConnectPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <AssignedMentorCard
             mentor={assignedMentor}
             isPrimary={true}
@@ -330,7 +320,7 @@ export default function ConnectPage() {
           onClick={() => setIsDirectoryOpen(true)}
           className="text-xs text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1 transition-colors"
         >
-          <span>Need a different specialist? Browse Database</span>
+          <span >Need a different specialist?</span>
           <span>→</span>
         </button>
       </div>
@@ -341,7 +331,7 @@ export default function ConnectPage() {
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2">
               <Calendar className="size-4 text-blue-400" />
-              <h2 className="text-base sm:text-lg font-bold text-white">
+              <h2 className="text-xs sm:text-lg font-bold text-white">
                 Upcoming Zoom Sessions
               </h2>
             </div>
@@ -368,13 +358,13 @@ export default function ConnectPage() {
         <section>
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2">
-              <History className="size-4 text-emerald-400" />
-              <h2 className="text-base sm:text-lg font-bold text-white">
+              <History className="size-5 text-emerald-400" />
+              <h2 className="text-xs sm:text-lg font-bold text-white">
                 Past Sessions &amp; Mentor Feedback
               </h2>
             </div>
-            <span className="text-xs text-white/40">
-              Click any session to view notes &amp; code evaluation
+            <span className="text-[10px] text-white/40">
+              Click any session to view
             </span>
           </div>
 
