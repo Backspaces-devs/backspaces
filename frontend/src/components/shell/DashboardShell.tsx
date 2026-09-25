@@ -18,8 +18,11 @@ import {
   ArrowLeft,
   Headset,
   MessagesSquare,
+  GraduationCap,
+  GitBranchIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GiThumbDown } from "react-icons/gi";
 
 interface NavItem {
   label: string;
@@ -42,7 +45,8 @@ const defaultNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
   { label: "Article", href: "/article", icon: <Feather className="size-5" /> },
   { label: "Problem Solving", href: "/problemSolving", icon: <CodeXml className="size-5" /> },
-  { label: "Competitive Programming", href: "/contests", icon: <Trophy className="size-5" /> },
+  { label: "Open Source", href: "/opensource", icon: <GitBranchIcon className="size-5" /> },
+  { label: "Academics", href: "/academics", icon: <GraduationCap className="size-5" /> },
   { label: "Connect", href: "/connect", icon: <Headset className="size-5" /> },
   { label: "Feedback", href: "/feedback", icon: <MessagesSquare className="size-5" /> },
 ];

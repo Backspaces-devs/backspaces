@@ -1,11 +1,7 @@
-import React from 'react'
+// src/app/(shell)/feedback/page.tsx — thin server wrapper; all state and logic
+// live in components/shell/feedback/FeedbackPageContent.tsx.
+import { FeedbackPageContent } from "@/components/shell/feedback/FeedbackPageContent";
 
-const FeedBackPage = () => {
-  return (
-    <div>
-      Here will be the feed back from the users
-    </div>
-  )
+export default function FeedbackPage() {
+  return <FeedbackPageContent />;
 }
-
-export default FeedBackPage

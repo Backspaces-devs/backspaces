@@ -1,0 +1,203 @@
+{
+  "assignedMentor": {
+    "id": "mentor-1",
+    "name": "Arjun Mehta",
+    "role": "Senior Software Engineer",
+    "company": "Razorpay",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "bio": "Ex-Directi · Specializes in High-Scale Systems, Distributed Systems & LeetCode Hard DSA. Mentored 120+ students to tier-1 tech offers.",
+    "rating": 4.9,
+    "totalSessions": 142,
+    "avgResponseTime": "< 2 hrs",
+    "assignedSince": "Aug 2026",
+    "status": "Available Today",
+    "tags": ["DSA & Algorithms", "System Design", "Node.js & Go", "Resume Review"],
+    "zoomPersonalLink": "https://zoom.us/j/backspaces-arjun",
+    "nextSlot": "Today at 5:30 PM IST"
+  },
+  "otherAssignedMentors": [
+    {
+      "id": "mentor-primary",
+      "name": "Priya Sharma",
+      "role": "Frontend Architect",
+      "company": "Swiggy",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      "bio": "Core React & Next.js specialist. Passionate about Web Performance, Accessibility, and UI Architecture.",
+      "rating": 4.95,
+      "totalSessions": 98,
+      "avgResponseTime": "< 4 hrs",
+      "status": "Meeting Scheduled",
+      "tags": ["React & Next.js", "System Architecture", "Web Performance", "Frontend Interviews"],
+      "zoomPersonalLink": "https://zoom.us/j/backspaces-priya"
+    }
+  ],
+  "upcomingMeetings": [
+    {
+      "id": "meet-101",
+      "mentorId": "mentor-primary",
+      "mentorName": "Arjun Mehta",
+      "mentorRole": "Senior SWE @ Razorpay",
+      "mentorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "title": "Dynamic Programming & Graph Traversal Doubt Solving",
+      "type": "Live Doubt Clearing",
+      "date": "Tomorrow, Sep 26, 2026",
+      "time": "4:30 PM – 5:15 PM IST",
+      "duration": "45 mins",
+      "status": "Confirmed",
+      "platform": "Zoom",
+      "zoomUrl": "https://zoom.us/j/98234719283?pwd=backspaces_secure_session",
+      "problemLink": "https://leetcode.com/problems/alien-dictionary/",
+      "agenda": "Review topological sort approach for Alien Dictionary and clarify memoization state transitions for DP on trees."
+    },
+    {
+      "id": "meet-102",
+      "mentorId": "mentor-2",
+      "mentorName": "Priya Sharma",
+      "mentorRole": "Frontend Architect @ Swiggy",
+      "mentorAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      "title": "Full-Stack Project Code Review & State Management Optimization",
+      "type": "Code Review",
+      "date": "Monday, Sep 28, 2026",
+      "time": "7:00 PM – 7:45 PM IST",
+      "duration": "45 mins",
+      "status": "Confirmed",
+      "platform": "Zoom",
+      "zoomUrl": "https://zoom.us/j/84920194821?pwd=swiggy_nextjs_session",
+      "problemLink": "https://github.com/vidit-sharma/dev-portfolio",
+      "agenda": "Audit server vs client component split in Next.js 16 and discuss TanStack Query caching strategies."
+    }
+  ],
+  "pastMeetings": [
+    {
+      "id": "meet-98",
+      "mentorId": "mentor-primary",
+      "mentorName": "Arjun Mehta",
+      "mentorRole": "Senior SWE @ Razorpay",
+      "mentorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "title": "Graph BFS/DFS & Dijkstra Optimization Doubt Clearing",
+      "type": "Doubt Clearing",
+      "date": "Sep 20, 2026",
+      "duration": "40 mins",
+      "platform": "Zoom",
+      "recordingUrl": "https://zoom.us/rec/play/backspaces-sep20-rec",
+      "feedback": {
+        "overallScore": 9.2,
+        "summary": "Great conceptual grasp of graph representations! You had a minor indexing bug in Dijkstra's priority queue comparator that caused infinite loop on disconnected components.",
+        "strengths": [
+          "Quick at writing adjacency lists and understanding edge weight semantics",
+          "Clean code structuring and meaningful variable names",
+          "Understands time complexity calculations for standard BFS"
+        ],
+        "improvementAreas": [
+          "Be careful with zero-indexed vs one-indexed graph node inputs",
+          "Practice identifying when 0-1 BFS (deque) is better than full priority queue Dijkstra"
+        ],
+        "actionItems": [
+          "Solve LeetCode #743 (Network Delay Time) using both Dijkstra and Bellman-Ford",
+          "Solve LeetCode #787 (Cheapest Flights Within K Stops)",
+          "Review priority queue comparator syntax in C++/Java/Python"
+        ],
+        "sharedResources": [
+          {
+            "title": "Visualgo: Graph Traversal & Shortest Paths",
+            "url": "https://visualgo.net/en/sssp"
+          },
+          {
+            "title": "TopCoder: Graph Theory Basics to Advanced",
+            "url": "https://www.topcoder.com/community/competitive-programming/tutorials/introduction-to-graphs-and-their-data-structures-section-1/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "meet-91",
+      "mentorId": "mentor-4",
+      "mentorName": "Rohan Deshmukh",
+      "mentorRole": "Staff Engineer @ Atlassian",
+      "mentorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "title": "Resume Review & 45-Min Mock Technical Interview",
+      "type": "Mock Interview",
+      "date": "Sep 12, 2026",
+      "duration": "50 mins",
+      "platform": "Zoom",
+      "recordingUrl": "https://zoom.us/rec/play/backspaces-sep12-mock",
+      "feedback": {
+        "overallScore": 8.6,
+        "summary": "Solid problem solving on the LRU Cache question! You communicated your thought process clearly before typing. Work on condensing project bullet points on your resume to emphasize quantifiable metrics.",
+        "strengths": [
+          "Clear vocalization of thoughts and edge case identification before coding",
+          "Proper doubly-linked list + hashmap implementation for O(1) LRU",
+          "Professional communication tone"
+        ],
+        "improvementAreas": [
+          "Resume project bullets lack business impact metrics (e.g. 'reduced latency by 35%')",
+          "Take 1 minute to write test cases manually before hitting 'Run Code'"
+        ],
+        "actionItems": [
+          "Update resume using XYZ formula: 'Accomplished [X] as measured by [Y] by doing [Z]'",
+          "Implement LFU Cache (LeetCode Hard #460) as follow-up exercise"
+        ],
+        "sharedResources": [
+          {
+            "title": "Google Tech Dev Guide: Resume & Behavioral Prep",
+            "url": "https://techdevguide.withgoogle.com"
+          }
+        ]
+      }
+    }
+  ],
+  "mentorDatabase": [
+    {
+      "id": "mentor-db-1",
+      "name": "Neha Kapoor",
+      "role": "SDE-2",
+      "company": "Amazon",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "bio": "AWS Lambda & Cloud Native systems. Specializes in low-latency backend architectures and DSA interview loops.",
+      "rating": 4.92,
+      "totalSessions": 84,
+      "availableSlots": ["Tomorrow 6:00 PM", "Saturday 11:00 AM", "Sunday 4:00 PM"],
+      "tags": ["DSA", "AWS & Cloud", "Java / Spring", "Backend"],
+      "verified": true
+    },
+    {
+      "id": "mentor-db-2",
+      "name": "Devansh Singhal",
+      "role": "Machine Learning Engineer",
+      "company": "Google",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "bio": "LLM fine-tuning, embeddings, and computer vision. Happy to help students transition into AI engineering and research.",
+      "rating": 4.98,
+      "totalSessions": 110,
+      "availableSlots": ["Friday 5:00 PM", "Saturday 2:00 PM"],
+      "tags": ["AI & ML", "PyTorch", "NLP", "Python", "Research Papers"],
+      "verified": true
+    },
+    {
+      "id": "mentor-db-3",
+      "name": "Kavya Ranganathan",
+      "role": "Senior Dev",
+      "company": "Uber",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      "bio": "Microservices, Kafka event streams, and real-time geospatial dispatch systems. Expert in System Design interviews.",
+      "rating": 4.88,
+      "totalSessions": 72,
+      "availableSlots": ["Sunday 10:00 AM", "Sunday 1:00 PM"],
+      "tags": ["System Design", "Go", "Kafka", "Microservices", "Concurrency"],
+      "verified": true
+    },
+    {
+      "id": "mentor-db-4",
+      "name": "Tanmay Verma",
+      "role": "Open Source Contributor & SWE",
+      "company": "Red Hat",
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+      "bio": "Kubernetes contributor, Linux internals & Go enthusiast. Mentoring students for GSOC and open-source contributions.",
+      "rating": 4.85,
+      "totalSessions": 65,
+      "availableSlots": ["Tomorrow 8:00 PM", "Monday 6:30 PM"],
+      "tags": ["Open Source", "Kubernetes", "DevOps", "Go", "GSOC"],
+      "verified": true
+    }
+  ]
+}
