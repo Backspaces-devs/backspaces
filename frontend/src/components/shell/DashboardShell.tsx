@@ -1,11 +1,24 @@
-// src/components/sections/DashboardShell.tsx
+// src/components/shell/DashboardShell.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Bell, Settings, LayoutDashboard, Newspaper, Feather, CodeXml, Trophy, ArrowLeft, Headset, MessagesSquare } from "lucide-react";
+import {
+  Menu,
+  X,
+  Bell,
+  Settings,
+  LayoutDashboard,
+  Newspaper,
+  Feather,
+  CodeXml,
+  Trophy,
+  ArrowLeft,
+  Headset,
+  MessagesSquare,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -44,6 +57,10 @@ export function DashboardShell({
   rightPanel,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationTriggerRef = useRef<HTMLButtonElement>(null);
+  const notificationCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationDrawerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
 
   const getPageTitle = () => {
@@ -53,6 +70,56 @@ export function DashboardShell({
     const segment = pathname.split("/").filter(Boolean).pop();
     return segment ? segment.charAt(0).toUpperCase() + segment.slice(1) : "Dashboard";
   };
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+
+    const drawer = notificationDrawerRef.current;
+    const notificationTrigger = notificationTriggerRef.current;
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    notificationCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setNotificationsOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab" || !drawer) return;
+
+      const focusableElements = Array.from(
+        drawer.querySelectorAll<HTMLElement>(focusableSelector)
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        return;
+      }
+
+      const focusIsOutsideDrawer = !drawer.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === firstElement || focusIsOutsideDrawer)) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === lastElement || focusIsOutsideDrawer)
+      ) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      notificationTrigger?.focus();
+    };
+  }, [notificationsOpen]);
 
   const glass =
     "bg-white/5 backdrop-blur-md border border-white/10 dark:bg-white/5 dark:border-white/10 light:bg-black/5 light:border-black/10";
@@ -70,7 +137,7 @@ export function DashboardShell({
         {/* Top 10% - company name */}
         <div className="h-[7.55%] flex items-center px-5 border-b border-white/10">
           <Link href="/" className="flex items-center gap-2">
-          <ArrowLeft className="size-6 hover:text-blue-400 transition-colors duration-300" />
+            <ArrowLeft className="size-6 hover:text-blue-400 transition-colors duration-300" />
             {/* <Image src="/logo.svg" alt={companyName} width={28} height={28} className="rounded-full" /> */}
             <span className="font-semibold text-lg tracking-tight">{companyName}</span>
           </Link>
@@ -155,7 +222,7 @@ export function DashboardShell({
       )}
 
       {/* MAIN SECTION */}
-      <main className="flex-1 lg:w-[70%] h-full flex flex-col overflow-hidden">
+      <main className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">
         {/* Top navbar inside main */}
         <div
           className={cn(
@@ -175,33 +242,95 @@ export function DashboardShell({
               {topBarContent ?? getPageTitle()}
             </h2>
           </div>
-          <Link href="/dashboard/notifications" className="lg:hidden" aria-label="Notifications">
-            <Bell className="size-5 text-muted-foreground" />
-          </Link>
+          <button
+            ref={notificationTriggerRef}
+            type="button"
+            onClick={() => {
+              setMobileOpen(false);
+              setNotificationsOpen((open) => !open);
+            }}
+            aria-label={notificationsOpen ? "Close notifications" : "Open notifications"}
+            aria-haspopup="dialog"
+            aria-expanded={notificationsOpen}
+            aria-controls="notifications-drawer"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Bell className="size-5" aria-hidden="true" />
+          </button>
         </div>
 
         {/* Variable main content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
       </main>
 
-      {/* RIGHT SECTION */}
-      <aside
+      {/* NOTIFICATION DRAWER */}
+      <div
         className={cn(
-          "hidden xl:flex xl:w-[15%] h-full flex-col shrink-0 border-l overflow-y-auto p-3 gap-3",
-          glass
+          "pointer-events-none fixed inset-0 z-[60]",
+          notificationsOpen && "pointer-events-auto"
         )}
+        aria-hidden={!notificationsOpen}
+        inert={!notificationsOpen}
       >
-        <div className="flex items-center justify-center h-10 shrink-0">
-          <Bell className="size-5 text-muted-foreground" />
-        </div>
-        <div className="flex-1 overflow-y-auto space-y-3">
-          {rightPanel ?? (
-            <p className="text-xs text-muted-foreground text-center px-1">
-              No updates yet
-            </p>
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={!notificationsOpen}
+          aria-label="Close notifications"
+          onClick={() => setNotificationsOpen(false)}
+          className={cn(
+            "absolute inset-0 cursor-default bg-black/55 backdrop-blur-sm transition-opacity duration-300 motion-reduce:transition-none",
+            notificationsOpen ? "opacity-100" : "opacity-0"
           )}
-        </div>
-      </aside>
+        />
+        <aside
+          id="notifications-drawer"
+          ref={notificationDrawerRef}
+          role="dialog"
+          aria-modal={notificationsOpen ? true : undefined}
+          aria-labelledby="notifications-heading"
+          className={cn(
+            "absolute inset-y-0 right-0 flex w-full max-w-md flex-col overflow-hidden border-l border-white/10 bg-background/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition-transform duration-300 ease-in-out motion-reduce:transition-none",
+            notificationsOpen ? "translate-x-0" : "translate-x-full"
+          )}
+        >
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Bell className="size-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <h2 id="notifications-heading" className="font-semibold tracking-tight">
+                  Notifications
+                </h2>
+                <p className="text-xs text-muted-foreground">Your latest updates</p>
+              </div>
+            </div>
+            <button
+              ref={notificationCloseButtonRef}
+              type="button"
+              onClick={() => setNotificationsOpen(false)}
+              aria-label="Close notifications"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6">
+            {rightPanel ?? (
+              <div className="mx-auto flex min-h-[16rem] max-w-xs flex-col items-center justify-center text-center">
+                <div className="mb-4 flex size-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-muted-foreground">
+                  <Bell className="size-6" aria-hidden="true" />
+                </div>
+                <h3 className="text-sm font-semibold">You&apos;re all caught up</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  New notifications will show up here when there&apos;s something to share.
+                </p>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
