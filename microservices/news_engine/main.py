@@ -1,3 +1,37 @@
+"""
+news_engine — Backspaces news microservice.
+
+Pipeline (same sources & reference topics as the original script):
+
+  1. Fetch   — RSS feeds (TechCrunch, The Verge, Ars Technica, Wired, InfoQ),
+               Hacker News top stories, Dev.to articles (configurable tags)
+  2. Dedup   — fuzzy title matching; keeps earliest copy + backfills fields
+  3. Score   — sentence-embedding similarity (all-MiniLM-L6-v2) against the
+               reference topics; keep items at/above THRESHOLD
+  4. Shape   — final article objects, sorted by relevance
+  5. Save    — data/response.json (overwritten on each run) and, if
+               MONGODB_URI is configured, the releventNews MongoDB
+               collection (upserted by URL — the library grows over
+               time; rerunning refreshes articles in place)
+
+Run it two ways:
+
+  # 1. Script mode — one-off run
+  python main.py
+
+  # 2. API mode
+  uvicorn main:app --reload
+  # GET /news?limit=20
+  # GET /health
+
+No API keys required — all sources are public.
+First run downloads the MiniLM model (~90 MB), afterwards it's cached.
+
+Configuration is loaded from environment variables / a .env file
+(see .env.example). All fetches (RSS, Hacker News, Dev.to) run
+concurrently using httpx.AsyncClient for lower end-to-end latency.
+"""
+
 import asyncio
 import calendar
 import html as html_mod
@@ -17,8 +51,8 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ReplaceOne
 from pydantic import BaseModel
-from pymongo import UpdateOne
 from sentence_transformers import SentenceTransformer, util
 
 # ---------------- config ----------------
@@ -26,6 +60,7 @@ from sentence_transformers import SentenceTransformer, util
 load_dotenv()  # reads a .env file in the working directory, if present
 
 SERVICE_DIR = Path(__file__).resolve().parent
+
 
 def _env_list(name: str, default: list[str]) -> list[str]:
     raw = os.getenv(name)
@@ -55,6 +90,7 @@ def _env_int(name: str, default: int) -> int:
         return int(os.getenv(name, default))
     except (TypeError, ValueError):
         return default
+
 
 DEFAULT_RSS_FEEDS = {
     "TechCrunch": "https://techcrunch.com/feed/",
@@ -147,6 +183,7 @@ class RawArticle(BaseModel):
     author: Optional[str] = None
     image: Optional[str] = None
     signal: Optional[int] = None       # HN points / Dev.to upvotes (RSS: none)
+    devto_id: Optional[int] = None     # Dev.to article id — needed to fetch the full body
     matched_sources: list[str] = []
     relevance: Optional[float] = None  # 0-1 cosine similarity, filled by scorer
     category: str = "General"
@@ -170,14 +207,28 @@ class Article(BaseModel):
 
 def clean_html(text: str) -> str:
     """Strip tags, unescape entities, collapse whitespace."""
-    if not text:
-        return ""
-    # Remove HTML tags
-    text = re.sub(r"<[^>]+>", " ", text)
-    # Unescape HTML entities like &amp;
+    text = re.sub(r"<[^>]+>", " ", text or "")
     text = html_mod.unescape(text)
-    # Collapse multiple whitespaces into a single space
     return re.sub(r"\s+", " ", text).strip()
+
+
+def markdown_to_text(md: str) -> str:
+    """Flatten markdown to readable plain text for the news dialog.
+
+    Keeps paragraph breaks (the dialog renders with whitespace-pre-wrap),
+    strips markdown syntax. No new dependencies."""
+    text = md or ""
+    text = re.sub(r"\A---\n.*?\n---\n?", "", text, flags=re.S)  # YAML frontmatter block
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)         # ![images](url)
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)     # [links](url) → label
+    text = re.sub(r"^```[^\n]*\n?", "", text, flags=re.M)    # code fences (code kept)
+    text = re.sub(r"^\s{0,3}#{1,6}\s*", "", text, flags=re.M)  # # headings
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)           # **bold**
+    text = re.sub(r"\*([^*\n]+)\*", r"\1", text)             # *italic*
+    text = re.sub(r"^\s*[-*+]\s+", "• ", text, flags=re.M)   # - bullets
+    text = re.sub(r"^>\s?", "", text, flags=re.M)            # > quotes
+    text = re.sub(r"\n{3,}", "\n\n", text)                   # collapse blank runs
+    return text.strip()
 
 
 def first_image_url(entry) -> Optional[str]:
@@ -200,6 +251,15 @@ def parse_iso_date(value: str) -> Optional[datetime]:
         return None
 
 # ---------------- fetchers (async, run concurrently) ----------------
+#
+# RSS: feedparser has no native async API, so each feed is downloaded with
+# httpx (async, non-blocking) and then parsed with feedparser from the raw
+# bytes already in memory (fast, CPU-only — no additional network I/O).
+#
+# Hacker News: story IDs are fetched once, then individual stories are
+# fetched concurrently (bounded by HN_CONCURRENCY) instead of sequentially.
+#
+# Dev.to: one request per tag, all issued concurrently.
 
 async def fetch_rss(client: httpx.AsyncClient) -> list[RawArticle]:
     async def fetch_one(source: str, url: str) -> list[RawArticle]:
@@ -214,24 +274,15 @@ async def fetch_rss(client: httpx.AsyncClient) -> list[RawArticle]:
 
         for entry in feed.entries:
             summary = clean_html(entry.get("summary", ""))
-            
-            # Try to get the fullest content available in the RSS feed
-            full_html = ""
-            if "content" in entry and entry.content:
-                full_html = entry.content[0].get("value", "")
-            elif "description" in entry:
-                full_html = entry.description
-
-            content = clean_html(full_html)
-            
+            full_html = (entry.get("content") or [{}])[0].get("value", "")
             ts = entry.get("published_parsed") or entry.get("updated_parsed")
             items.append(RawArticle(
                 title=entry.get("title", ""),
                 source=source,
                 url=entry.get("link", ""),
                 published_at=datetime.fromtimestamp(calendar.timegm(ts), tz=timezone.utc) if ts else None,
-                description=summary or content[:500] + "..." if content else None, # Fallback description
-                content=content or summary or None, # Ensure we save the full content if found
+                description=summary or None,
+                content=clean_html(full_html) or summary or None,
                 author=entry.get("author") or None,
                 image=first_image_url(entry),
             ))
@@ -267,8 +318,8 @@ async def fetch_hn(client: httpx.AsyncClient) -> list[RawArticle]:
             source="Hacker News",
             url=story.get("url", f"https://news.ycombinator.com/item?id={story_id}"),
             published_at=datetime.fromtimestamp(story.get("time", 0), tz=timezone.utc),
-            description=text[:500] + "..." if len(text) > 500 else text or None,
-            content=text or None, # Hacker news usually only has 'text' for self posts, links go elsewhere
+            description=text or None,
+            content=text or None,
             author=story.get("by") or None,
             image=None,
             signal=story.get("score", 0),
@@ -282,10 +333,6 @@ async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
     async def fetch_tag(tag: str) -> list[RawArticle]:
         items = []
         try:
-            # Note: The /articles endpoint returns a summary. 
-            # To get full content, you technically need to hit /articles/{id} for each,
-            # but that requires many API calls. We will rely on 'body_markdown' if it's there,
-            # or 'description' as fallback.
             resp = await client.get(
                 "https://dev.to/api/articles",
                 params={"tag": tag, "per_page": DEV_TO_PER_TAG},
@@ -298,25 +345,18 @@ async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
             return items
 
         for article in articles:
-            # Some APIs give excerpts in description.
-            description = article.get("description") or ""
-            # Dev.to list API might return body_markdown, if not, we fallback.
-            body_markdown = article.get("body_markdown") or description
-            
-            # Clean up content to remove formatting if desired, or keep as is.
-            # Keeping as is here, but stripping HTML just in case.
-            clean_content = clean_html(body_markdown)
-
+            description = article.get("description") or None
             items.append(RawArticle(
                 title=article.get("title", ""),
                 source="Dev.to",
                 url=article.get("url", ""),
                 published_at=parse_iso_date(article.get("published_at", "")),
-                description=description or clean_content[:500] + "..." if clean_content else None,
-                content=clean_content or None, 
+                description=description,
+                content=article.get("body_markdown") or description,
                 author=(article.get("user") or {}).get("name") or None,
                 image=article.get("cover_image") or None,
                 signal=article.get("positive_reactions_count", 0),
+                devto_id=article.get("id"),
             ))
         return items
 
@@ -325,6 +365,42 @@ async def fetch_devto(client: httpx.AsyncClient) -> list[RawArticle]:
 
 
 FETCHERS = [fetch_rss, fetch_hn, fetch_devto]
+
+
+async def enrich_devto_content(kept: list[RawArticle]) -> None:
+    """Fetch full article bodies for the kept Dev.to items.
+
+    The tag listing endpoint never includes body_markdown — only the
+    single-article endpoint (dev.to/api/articles/{id}, also keyless) does —
+    so fetch it for the few items that survived scoring and replace the
+    teaser content. Runs after scoring so it costs ~1 request per kept
+    Dev.to article, not per fetched one. Failures keep the teaser."""
+    targets = [a for a in kept if a.source == "Dev.to" and a.devto_id]
+    if not targets:
+        return
+
+    sem = asyncio.Semaphore(5)  # be polite to the Dev.to API
+    done = 0
+
+    async def fetch_body(client: httpx.AsyncClient, article: RawArticle) -> None:
+        nonlocal done
+        try:
+            async with sem:
+                resp = await client.get(
+                    f"https://dev.to/api/articles/{article.devto_id}",
+                    timeout=REQUEST_TIMEOUT,
+                )
+            resp.raise_for_status()
+            body = (resp.json() or {}).get("body_markdown")
+            if body:
+                article.content = markdown_to_text(body)
+                done += 1
+        except Exception as e:
+            logger.warning("Dev.to body fetch failed (id %s): %s", article.devto_id, e)
+
+    async with httpx.AsyncClient(headers={"User-Agent": "news-engine/3.1"}) as client:
+        await asyncio.gather(*(fetch_body(client, a) for a in targets))
+    logger.info("Dev.to full bodies fetched: %d/%d", done, len(targets))
 
 # ---------------- dedup ----------------
 
@@ -429,15 +505,12 @@ def format_date(published_at: Optional[datetime]) -> str:
 
 
 def to_final_article(idx: int, raw: RawArticle) -> Article:
-    # Provide a graceful fallback for link-only posts (like HN) to prevent empty UI cards
-    fallback_text = f"Article shared via {raw.source}. Visit the source link to read the full story."
-    
     return Article(
         id=idx,
         heading=raw.title,
         category=raw.category,
-        description=raw.description or fallback_text,
-        content=raw.content or raw.description or fallback_text,
+        description=raw.description,
+        content=raw.content,
         url=raw.url,
         source=raw.source,
         author=raw.author,
@@ -471,7 +544,10 @@ async def run_news_pipeline_async(limit: int = MAX_ITEMS) -> list[Article]:
     kept.sort(key=lambda x: x.relevance, reverse=True)
     logger.info("Kept %d of %d items above threshold %.2f", len(kept), len(items), THRESHOLD)
 
-    return [to_final_article(i + 1, item) for i, item in enumerate(kept[:limit])]
+    top = kept[:limit]
+    await enrich_devto_content(top)
+
+    return [to_final_article(i + 1, item) for i, item in enumerate(top)]
 
 
 def run_news_pipeline(limit: int = MAX_ITEMS) -> list[Article]:
@@ -505,37 +581,90 @@ def get_mongo_client() -> AsyncIOMotorClient:
 
 
 async def save_to_mongo(articles: list[Article]) -> int:
-    """Upserts this run's articles to the releventNews collection.
-    Uses the article URL to prevent duplicates, allowing the DB to grow.
-    Returns the number of documents processed. No-op if MONGODB_URI isn't configured."""
+    """Upsert this run's articles into the releventNews collection.
+
+    The collection is the growing news library — articles from previous
+    runs are kept, nothing is deleted. An article whose URL is already in
+    the library gets its fields refreshed in place and keeps its numeric id
+    (so the full-body enrichment replaces old truncated teasers); genuinely
+    new articles receive fresh, ever-incrementing ids. No-op (with a
+    warning) if MONGODB_URI isn't configured, so Mongo saving is optional."""
     if not MONGODB_URI:
         logger.warning("MONGODB_URI not set — skipping MongoDB save.")
+        return 0
+
+    docs = [a.model_dump() for a in articles]
+    if not docs:
+        logger.warning("No articles this run — leaving Mongo untouched.")
         return 0
 
     client = get_mongo_client()
     collection = client[MONGO_DB_NAME][MONGO_COLLECTION_NAME]
 
-    docs = [a.model_dump() for a in articles]
-    operations = []
-    
+    # Self-heal: runs from older engine versions may have left duplicate `id`
+    # values (per-run numbering) or docs where _id != id. Keep the first doc of
+    # each duplicated id; push the extras (and the counter base) above both the
+    # max `id` field and the max numeric `_id`, so new ids can never collide
+    # with a legacy slot again. Runs only when duplicates exist.
+    dup_ids = [
+        g["_id"]
+        async for g in collection.aggregate([
+            {"$group": {"_id": "$id", "n": {"$sum": 1}}},
+            {"$match": {"n": {"$gt": 1}}},
+        ])
+    ]
+    if dup_ids:
+        top_id = await collection.find_one({}, sort=[("id", -1)], projection={"_id": 0, "id": 1})
+        top_oid = await collection.find_one({"_id": {"$type": "number"}}, sort=[("_id", -1)], projection={"_id": 1})
+        seq = max(top_id["id"] if top_id else 0, top_oid["_id"] if top_oid else 0) + 1
+        healed = 0
+        for dup in dup_ids:
+            first = True
+            async for d in collection.find({"id": dup}, {"_id": 1}).sort("_id", 1):
+                if first:
+                    first = False
+                    continue
+                await collection.update_one({"_id": d["_id"]}, {"$set": {"id": seq}})
+                seq += 1
+                healed += 1
+        logger.warning("Self-healed %d duplicate id value(s): %s", healed, dup_ids)
+
+    # Existing articles (by URL) keep their current ids.
+    urls = [d["url"] for d in docs]
+    existing = {
+        doc["url"]: doc["id"]
+        async for doc in collection.find({"url": {"$in": urls}}, {"_id": 0, "url": 1, "id": 1})
+    }
+
+    # New articles continue from the collection's current max id.
+    top = await collection.find_one({}, sort=[("id", -1)], projection={"_id": 0, "id": 1})
+    counter = (top["id"] if top else 0) + 1
+
+    ops = []
+    new = refreshed = 0
     for doc in docs:
-        # We use the article's URL as the unique identifier.
-        # If the URL exists, it updates the record. If not, it inserts it.
-        operations.append(
-            UpdateOne({"url": doc["url"]}, {"$set": doc}, upsert=True)
-        )
+        doc_id = existing.get(doc["url"])
+        if doc_id is None:
+            doc_id = counter
+            counter += 1
+            new += 1
+        else:
+            refreshed += 1
+        doc["id"] = doc_id
+        doc["_id"] = doc_id  # _id mirrors id — keeps backend /api/news/:id routes working
+        ops.append(ReplaceOne({"_id": doc_id}, doc, upsert=True))
 
     try:
-        if operations:
-            result = await collection.bulk_write(operations)
-            logger.info(
-                "MongoDB sync complete: %d new inserted, %d existing updated in %s.%s",
-                result.upserted_count, result.modified_count, MONGO_DB_NAME, MONGO_COLLECTION_NAME
-            )
+        await collection.bulk_write(ops, ordered=False)
     except Exception as e:
         logger.error("MongoDB save failed: %s", e)
         return 0
 
+    total = await collection.estimated_document_count()
+    logger.info(
+        "Saved to MongoDB (%s.%s): %d new, %d refreshed — library size %d (nothing deleted)",
+        MONGO_DB_NAME, MONGO_COLLECTION_NAME, new, refreshed, total,
+    )
     return len(docs)
 
 
@@ -593,6 +722,9 @@ async def health():
 @app.on_event("shutdown")
 async def _on_shutdown():
     await close_mongo_client()
+
+# ---------------- script mode ----------------
+# `python main.py` — fetches, scores, and saves data/response.json.
 
 # ---------------- script mode ----------------
 # `python main.py` — fetches, scores, saves data/response.json, and (if
