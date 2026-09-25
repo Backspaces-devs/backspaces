@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fb-001",
+    "title": "Add dark mode for articles",
+    "description": "It would be great to have a dark mode for reading articles.",
+    "type": "Feature Request",
+    "category": "UI/UX",
+    "status": "Implemented",
+    "date": "Sep 18, 2026",
+    "votes": 24,
+    "comments": 5,
+    "mine": true
+  },
+  {
+    "id": "fb-002",
+    "title": "Add filtering options in News section",
+    "description": "Allow filtering news by category such as AI, Web Dev, etc.",
+    "type": "Feature Request",
+    "category": "News",
+    "status": "In Progress",
+    "date": "Sep 16, 2026",
+    "votes": 18,
+    "comments": 3,
+    "mine": true
+  },
+  {
+    "id": "fb-003",
+    "title": "Mobile responsive sidebar",
+    "description": "Sidebar overlaps content on smaller screens.",
+    "type": "Bug Report",
+    "category": "UI/UX",
+    "status": "Planned",
+    "date": "Sep 12, 2026",
+    "votes": 12,
+    "comments": 2,
+    "mine": false
+  },
+  {
+    "id": "fb-004",
+    "title": "Add coding streak feature",
+    "description": "A simple streak system to track daily coding activity would be useful.",
+    "type": "Feature Request",
+    "category": "Gamification",
+    "status": "Planned",
+    "date": "Sep 10, 2026",
+    "votes": 9,
+    "comments": 7,
+    "mine": false
+  }
+]
