@@ -1,212 +1,151 @@
+// src/components/shell/feedback/FeedbackDialog.tsx — "Give Feedback" modal.
+// Pattern mirrors NewsDialog (portal, backdrop blur, Esc close, bottom-sheet on
+// mobile). After submit it briefly shows <ThankYouState /> and closes itself.
+// Submission is a stub (console.log) until feedback gets a real API.
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { Check, X } from "lucide-react";
-import ThankYouState from "./ThankYouState";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { X, Send } from "lucide-react";
+import type { FeedbackType } from "./FeedbackCard";
+import { ThankYouState } from "./ThankYouState";
 
-type FeedbackDialogProps = {
+const TYPE_OPTIONS: FeedbackType[] = ["Feature Request", "Bug Report", "UI/UX Suggestion", "General Inquiry"];
+
+const field =
+  "w-full bg-white/[0.04] border border-white/10 rounded-md px-3 py-2 text-[13px] text-neutral-100 placeholder:text-white/25 focus:outline-none focus:border-white/30 transition-colors";
+
+interface FeedbackDialogProps {
   open: boolean;
-  onClose: () => void;
-  onSubmitted?: (feedback: {
-    title: string;
-    description: string;
-    type: string;
-    category: string;
-  }) => void;
-};
+  onOpenChange: (open: boolean) => void;
+}
 
-const initialForm = {
-  title: "",
-  description: "",
-  type: "Feature Request",
-  category: "General",
-};
-
-export default function FeedbackDialog({
-  open,
-  onClose,
-  onSubmitted,
-}: FeedbackDialogProps) {
-  const [form, setForm] = useState(initialForm);
+export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
+  const [mounted, setMounted] = useState(false);
+  const [type, setType] = useState<FeedbackType>("Feature Request");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
-    if (!open) return;
-
-    setSubmitted(false);
-    setForm(initialForm);
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
-
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, [open]);
 
   useEffect(() => {
-    if (!submitted) return;
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onOpenChange(false);
+    if (open) window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [open, onOpenChange]);
 
-    const timer = window.setTimeout(() => {
-      onClose();
-    }, 1900);
+  // reset the form each time the dialog opens
+  useEffect(() => {
+    if (open) setSubmitted(false);
+  }, [open]);
 
-    return () => window.clearTimeout(timer);
-  }, [submitted, onClose]);
+  if (!mounted || !open) return null;
 
-  if (!open) return null;
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    onSubmitted?.(form);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: replace with POST /api/feedback when the backend route exists
+    console.log({ type, title, description });
     setSubmitted(true);
+    setTimeout(() => onOpenChange(false), 1600);
+    setType("Feature Request");
+    setTitle("");
+    setDescription("");
   };
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      role="presentation"
-    >
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-800 bg-[#0c0f15] shadow-2xl shadow-black/50 animate-[dialog-in_180ms_ease-out]"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="feedback-dialog-title"
-      >
+        className="absolute inset-0 bg-black/70 backdrop-blur-[12px] transition-opacity duration-200"
+        onClick={() => onOpenChange(false)}
+      />
+
+      <div className="relative flex flex-col w-full bg-[#121215]/95 backdrop-blur-2xl border border-white/[0.08] shadow-2xl h-[100dvh] rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-[440px] sm:w-[90vw] sm:rounded-[20px]">
+        <button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-3.5 right-3.5 z-10 p-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] text-white/60 hover:text-white transition-colors"
+          aria-label="Close dialog"
+        >
+          <X className="size-3.5" />
+        </button>
+
         {submitted ? (
-          <ThankYouState />
+          <div className="flex flex-col min-h-[320px]">
+            <ThankYouState />
+          </div>
         ) : (
           <>
-            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4 sm:px-6">
-              <div>
-                <h2
-                  id="feedback-dialog-title"
-                  className="font-semibold text-slate-100"
-                >
-                  Give feedback
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Tell us what we can improve.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
-              >
-                <X size={18} />
-              </button>
+            <div className="shrink-0 p-5 sm:p-6 pb-3.5">
+              <h2 className="text-lg font-semibold text-white pr-10">Give Feedback</h2>
+              <p className="mt-0.5 text-xs text-white/40">Bugs, ideas, or feature requests — we read everything.</p>
             </div>
 
-            <form onSubmit={submit} className="space-y-5 p-5 sm:p-6">
-              <div>
-                <label className="mb-2 block text-xs font-medium text-slate-300">
-                  What should we improve? <span className="text-violet-400">*</span>
-                </label>
+            <div className="h-px bg-white/[0.08] mx-5 sm:mx-6" />
+
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 pt-4 flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-medium text-white/70">What kind of feedback is this?</label>
+                <div className="relative">
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as FeedbackType)}
+                    className={`${field} appearance-none cursor-pointer`}
+                  >
+                    {TYPE_OPTIONS.map((t) => (
+                      <option key={t} className="bg-neutral-900">
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/40 text-[10px]">▼</div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-medium text-white/70">Title</label>
                 <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Short summary — e.g. Add filtering in the News section"
                   required
-                  value={form.title}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="e.g. Add filters to News"
-                  className="h-11 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-violet-500/60"
+                  maxLength={120}
+                  className={field}
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-xs font-medium text-slate-300">
-                  Description <span className="text-violet-400">*</span>
-                </label>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-medium text-white/70">Details</label>
                 <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe your feedback in detail..."
+                  rows={4}
                   required
-                  minLength={10}
-                  rows={5}
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  placeholder="Describe the issue, idea, or improvement..."
-                  className="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-3 py-3 text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-600 focus:border-violet-500/60"
+                  className={`${field} resize-none`}
                 />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-xs font-medium text-slate-300">
-                    Type
-                  </label>
-                  <select
-                    value={form.type}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, type: e.target.value }))
-                    }
-                    className="h-11 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 outline-none focus:border-violet-500/60"
-                  >
-                    <option>Feature Request</option>
-                    <option>Bug Report</option>
-                    <option>Improvement</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-medium text-slate-300">
-                    Category
-                  </label>
-                  <select
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        category: e.target.value,
-                      }))
-                    }
-                    className="h-11 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 outline-none focus:border-violet-500/60"
-                  >
-                    <option>General</option>
-                    <option>UI/UX</option>
-                    <option>News</option>
-                    <option>Article</option>
-                    <option>Problem Solving</option>
-                    <option>Open Source</option>
-                    <option>Academics</option>
-                  </select>
-                </div>
               </div>
 
               <button
                 type="submit"
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-500 active:scale-[.99]"
+                className="inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-white/85 text-[13px] font-medium py-2 px-4 rounded-md transition-colors w-fit"
               >
-                <Check size={17} />
-                Submit feedback
+                Submit Feedback
+                <Send className="size-3" />
               </button>
             </form>
           </>
         )}
 
-        <style jsx>{`
-          @keyframes dialog-in {
-            from { opacity: 0; transform: translateY(8px) scale(.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-          }
-        `}</style>
+        <div className="sm:hidden absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/20" />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

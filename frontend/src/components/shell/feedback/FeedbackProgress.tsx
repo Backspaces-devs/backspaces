@@ -1,74 +1,57 @@
-import type { FeedbackStatus } from "@/app/types/feedback";
+// src/components/shell/feedback/FeedbackProgress.tsx — compact 4-stage tracker.
+// Monochrome: completed = white node + black check, current = white ring + dot,
+// upcoming = faint ring. Follows the selected feedback card.
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { FeedbackStatus } from "./FeedbackCard";
+import { FEEDBACK_STAGES, STAGE_META } from "./FeedbackCard";
 
-const steps: FeedbackStatus[] = [
-  "In Review",
-  "Planned",
-  "In Progress",
-  "Implemented",
-];
-
-const rank: Record<FeedbackStatus, number> = {
-  "In Review": 1,
-  Planned: 2,
-  "In Progress": 3,
-  Implemented: 4,
-};
-
-export default function FeedbackProgress({
-  status,
-}: {
+interface FeedbackProgressProps {
   status: FeedbackStatus;
-}) {
-  const current = rank[status];
+  date: string;
+}
+
+const NODE_W = 80; // px — node column width; line insets align to node centers
+
+export function FeedbackProgress({ status, date }: FeedbackProgressProps) {
+  const current = FEEDBACK_STAGES.indexOf(status);
+  const fraction = current / (FEEDBACK_STAGES.length - 1);
 
   return (
-    <div className="overflow-x-auto pb-2">
-      <div className="mx-auto flex min-w-[680px] items-start px-3">
-        {steps.map((step, index) => {
-          const active = rank[step] <= current;
-          const currentStep = rank[step] === current;
+    <div className="relative flex justify-between max-w-2xl pt-0.5">
+      {/* connecting line */}
+      <div className="absolute top-[13px] h-px bg-white/10" style={{ left: NODE_W / 2, right: NODE_W / 2 }} />
+      <div
+        className="absolute top-[13px] h-px bg-white/50 transition-all duration-500"
+        style={{ left: NODE_W / 2, width: `calc(${fraction} * (100% - ${NODE_W}px))` }}
+      />
 
-          return (
-            <div key={step} className="flex flex-1 items-start">
-              <div className="flex min-w-0 flex-col items-center text-center">
-                <div
-                  className={[
-                    "flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all",
-                    active
-                      ? "border-violet-400 bg-violet-500 text-white"
-                      : "border-slate-700 bg-slate-900 text-slate-500",
-                    currentStep ? "ring-4 ring-violet-500/10" : "",
-                  ].join(" ")}
-                >
-                  {active && rank[step] < current ? "✓" : rank[step]}
-                </div>
-                <span
-                  className={`mt-2 text-xs font-medium ${
-                    active ? "text-slate-200" : "text-slate-500"
-                  }`}
-                >
-                  {step}
-                </span>
-                {currentStep && (
-                  <span className="mt-1 text-[11px] text-slate-500">
-                    Current status
-                  </span>
-                )}
-              </div>
+      {FEEDBACK_STAGES.map((stage, i) => {
+        const isDone = i < current;
+        const isCurrent = i === current;
+        const sublabel = stage === "submitted" ? date : STAGE_META[stage].sublabel;
 
-              {index < steps.length - 1 && (
-                <div
-                  className={`mt-4 h-px flex-1 ${
-                    rank[steps[index + 1]] <= current
-                      ? "bg-violet-500"
-                      : "bg-slate-800"
-                  }`}
-                />
+        return (
+          <div key={stage} className="relative z-10 flex flex-col items-center gap-1.5 w-20 text-center">
+            <span
+              className={cn(
+                "flex items-center justify-center size-5 rounded-full border-[1.5px] transition-colors bg-background",
+                isDone && "border-white bg-white text-black",
+                isCurrent && "border-white/70 text-white",
+                !isDone && !isCurrent && "border-white/15 text-transparent"
               )}
+            >
+              {isDone ? <Check className="size-3" strokeWidth={3} /> : <span className="size-1.5 rounded-full bg-current" />}
+            </span>
+            <div>
+              <p className={cn("text-[11px] font-medium leading-tight", i <= current ? "text-white/90" : "text-white/30")}>
+                {STAGE_META[stage].label}
+              </p>
+              <p className="text-[10px] text-white/30 mt-0.5 leading-tight">{sublabel}</p>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1,23 +1,15 @@
-export default function ThankYouState() {
-  return (
-    <div className="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
-      <div className="flex h-16 w-16 animate-[feedback-pop_500ms_ease-out] items-center justify-center rounded-full bg-emerald-500/10 text-3xl text-emerald-400">
-        ✓
-      </div>
-      <h3 className="mt-5 text-xl font-semibold text-slate-100">
-        Thank you for your feedback!
-      </h3>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-        Your feedback has been received. It helps us make Backspaces better.
-      </p>
+// src/components/shell/feedback/ThankYouState.tsx — confirmation view shown
+// inside the FeedbackDialog right after a successful submit.
+import { CheckCircle2 } from "lucide-react";
 
-      <style jsx>{`
-        @keyframes feedback-pop {
-          0% { opacity: 0; transform: scale(.5); }
-          70% { transform: scale(1.08); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
+export function ThankYouState() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-3 py-14 text-center">
+      <span className="flex items-center justify-center size-11 rounded-full border border-white/15 bg-white/[0.05]">
+        <CheckCircle2 className="size-5 text-white" />
+      </span>
+      <p className="text-sm font-medium text-white">Thanks for the feedback</p>
+      <p className="text-xs text-white/40 -mt-1">It just joined the review queue.</p>
     </div>
   );
 }
