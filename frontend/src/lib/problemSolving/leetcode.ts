@@ -41,7 +41,7 @@ query backspacesProfile($username: String!) {
     attended rating contest { title startTime }
   }
   recentSubmissionList(username: $username, limit: 15) {
-    title titleSlug timestamp statusDisplay lang
+    id title titleSlug timestamp statusDisplay lang
   }
   recentAcSubmissionList(username: $username, limit: 20) {
     titleSlug
@@ -67,7 +67,7 @@ interface ProfileData {
     badge: { name: string } | null;
   } | null;
   userContestRankingHistory: { attended: boolean; rating: number; contest: { title: string; startTime: number } }[] | null;
-  recentSubmissionList: { title: string; titleSlug: string; timestamp: string; statusDisplay: string; lang: string }[] | null;
+  recentSubmissionList: { id?: string; title: string; titleSlug: string; timestamp: string; statusDisplay: string; lang: string }[] | null;
   recentAcSubmissionList: { titleSlug: string }[] | null;
 }
 
@@ -116,6 +116,7 @@ export async function fetchLeetCode(handle: string): Promise<LeetCodeResult> {
   const subs = data.recentSubmissionList ?? [];
   const diffs = await difficultiesFor(subs.map((s) => s.titleSlug));
   const recent: Activity[] = subs.map((s) => ({
+    id: `leetcode-${s.id ?? `${s.timestamp}-${s.titleSlug}`}`,
     platform: "leetcode",
     title: s.title,
     slug: s.titleSlug,

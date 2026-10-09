@@ -16,6 +16,8 @@ export interface DifficultySplit {
 export type VerdictKind = "ac" | "wa" | "tle" | "mle" | "re" | "ce" | "other";
 
 export interface Activity {
+  /** Unique per submission, e.g. "codechef-1369616972" — used as the React key. */
+  id: string;
   platform: PlatformKey;
   title: string;
   url: string;

@@ -128,6 +128,7 @@ export async function fetchCodeforces(handle: string): Promise<PlatformStats> {
     .filter((s) => s.verdict !== "TESTING")
     .slice(0, 15)
     .map((s) => ({
+      id: `codeforces-${s.id}`,
       platform: "codeforces",
       title: `${s.problem.contestId ?? ""}${s.problem.index} · ${s.problem.name}`,
       url: problemUrl(s.problem),

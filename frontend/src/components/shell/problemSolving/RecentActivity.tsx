@@ -61,12 +61,14 @@ export function RecentActivity({
         <EmptyNote>No recent submissions found.</EmptyNote>
       ) : (
         <div className={cn("space-y-1", expanded && "max-h-[360px] overflow-y-auto pr-1")}>
-          {shown.map((a) => {
+          {shown.map((a, i) => {
             const key = activityKey(a.platform, a.slug ?? a.title);
             const queued = queuedKeys.has(key);
             return (
               <div
-                key={`${a.platform}-${a.timestamp}-${a.slug}`}
+                // Ids can repeat across platforms (or be missing), so combine
+                // platform + id + timestamp + index to keep keys unique.
+                key={`${a.platform}:${a.id ?? key}:${a.timestamp}:${i}`}
                 className="group flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.04] transition-colors"
               >
                 <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: VERDICT_COLOR[a.verdict] }} />

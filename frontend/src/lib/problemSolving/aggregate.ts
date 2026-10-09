@@ -110,10 +110,12 @@ export async function getStats(force = false): Promise<StatsResponse> {
     }
   }
 
-  const activity: Activity[] = ok
-    .flatMap((s) => s.recent)
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .slice(0, 20);
+  const activity: Activity[] = uniqueIds(
+    ok
+      .flatMap((s) => s.recent)
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 20)
+  );
 
   const ratingHistory: StatsResponse["ratingHistory"] = {};
   for (const s of ok) if (s.ratingHistory.length) ratingHistory[s.platform] = s.ratingHistory;
@@ -183,4 +185,14 @@ export async function getPotd(force = false): Promise<PotdResponse> {
   if (gfg.status === "fulfilled") problems.push(gfg.value);
   else errors.gfg = errorMessage(gfg.reason);
   return { fetchedAt: new Date().toISOString(), problems, errors };
+}
+
+/** Guarantees unique activity ids (they're React keys) by suffixing any repeats. */
+function uniqueIds(list: Activity[]): Activity[] {
+  const seen = new Map<string, number>();
+  return list.map((a) => {
+    const n = seen.get(a.id) ?? 0;
+    seen.set(a.id, n + 1);
+    return n === 0 ? a : { ...a, id: `${a.id}~${n}` };
+  });
 }

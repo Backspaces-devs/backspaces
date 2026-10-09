@@ -56,14 +56,18 @@ async function fetchRecent(handle: string): Promise<Activity[]> {
     const html = res?.content ?? "";
     const rows = [...html.matchAll(/<tr\s*>([\s\S]*?)<\/tr>/g)].map((m) => m[1]).filter((r) => r.includes("<td"));
     const out: Activity[] = [];
-    for (const row of rows.slice(0, 15)) {
+    for (const [i, row] of rows.slice(0, 15).entries()) {
       const cells = [...row.matchAll(/<td[^>]*title='([^']*)'/g)].map((m) => m[1]);
       const link = row.match(/href='([^']*\/problems\/[^']*)'[^>]*>([^<]*)<\/a>/);
       const result = row.match(/<span title='([^']*)'/)?.[1] ?? "";
       const ts = parseCodechefTime(cells[0] ?? "");
       if (!link || !ts) continue;
+      // submission times only have minute precision, so several attempts at the
+      // same problem can share a timestamp — the solution id is what's unique
+      const solutionId = row.match(/\/viewsolution\/(\d+)/)?.[1];
       const label = result ? result.replace(/\b\w/g, (c) => c.toUpperCase()) : "Submitted";
       out.push({
+        id: `codechef-${solutionId ?? `${ts}-${link[2].trim()}-${i}`}`,
         platform: "codechef",
         title: link[2].trim(),
         slug: link[2].trim(),

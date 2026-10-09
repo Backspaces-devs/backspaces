@@ -48,6 +48,7 @@ export async function fetchGfg(handle: string): Promise<PlatformStats> {
       if (Number.isFinite(ts)) {
         addDayCount(dayCounts, p.user_subtime.slice(0, 10));
         all.push({
+          id: `gfg-${p.slug}`,
           platform: "gfg",
           title: p.pname,
           slug: p.slug,
