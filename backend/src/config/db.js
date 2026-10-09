@@ -20,6 +20,17 @@ export function getCollection() {
   return collection;
 }
 
+/**
+ * A collection in the practice database (revision queue, sheet progress).
+ * Lives in PRACTICE_DB_NAME (default "Backspaces") so news data stays separate.
+ */
+export function getPracticeCollection(name) {
+  if (!client) {
+    throw new Error("Database is not connected yet.");
+  }
+  return client.db(env.practiceDbName).collection(name);
+}
+
 /** Close the connection cleanly (Ctrl+C / deploy shutdowns). */
 export async function closeDb() {
   if (client) {

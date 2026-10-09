@@ -17,6 +17,8 @@ export const env = {
   // Defaults match the news engine (microservices/news_engine) — override in .env if you changed them there.
   dbName: process.env.MONGO_DB_NAME || "News",
   collectionName: process.env.MONGO_COLLECTION_NAME || "releventNews",
+  // Problem Solving page data (revision queue + DSA sheet progress).
+  practiceDbName: process.env.PRACTICE_DB_NAME || "Backspaces",
   // Where the frontend runs — direct fetches from these origins are allowed (CORS).
   corsOrigins: (process.env.CORS_ORIGINS ||
     "http://localhost:3000,https://backspaces-one.vercel.app")
