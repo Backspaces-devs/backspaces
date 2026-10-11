@@ -23,24 +23,30 @@ interface ApiState<T> {
 
 /**
  * GETs `url` on mount. `refresh()` re-fetches with ?refresh=1 (bypasses the
- * server cache) while keeping the previous data on screen.
+ * server cache) while keeping the previous data on screen. `reload()` is a
+ * quiet background re-fetch: no loading state, and errors keep the old data.
  */
 export function useApi<T>(url: string) {
   const [nonce, setNonce] = useState(0);
+  const [soft, setSoft] = useState(0);
   const [state, setState] = useState<ApiState<T> | null>(null);
   const key = `${url}#${nonce}`;
 
   useEffect(() => {
     const ctrl = new AbortController();
     const target = nonce > 0 ? `${url}${url.includes("?") ? "&" : "?"}refresh=1` : url;
+    const background = soft > 0;
     requestJson<T>(target, { signal: ctrl.signal }).then(
       (data) => setState({ key, data }),
       (err: Error) => {
-        if (!ctrl.signal.aborted) setState((prev) => ({ key, data: prev?.data, error: err.message }));
+        if (ctrl.signal.aborted) return;
+        setState((prev) =>
+          background && prev?.key === key && prev.data !== undefined ? prev : { key, data: prev?.data, error: err.message }
+        );
       }
     );
     return () => ctrl.abort();
-  }, [url, nonce, key]);
+  }, [url, nonce, key, soft]);
 
   const loading = state?.key !== key;
   return {
@@ -48,6 +54,7 @@ export function useApi<T>(url: string) {
     error: loading ? undefined : state?.error,
     loading,
     refresh: useCallback(() => setNonce((n) => n + 1), []),
+    reload: useCallback(() => setSoft((n) => n + 1), []),
   };
 }
 

@@ -38,6 +38,18 @@ export async function forwardToBackend(
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     const data = await res.json().catch(() => null);
+    // The backend's own catch-all 404 ("Route not found: …") means the server at
+    // API_URL is running code without the practice routes — not a missing task.
+    if (res.status === 404 && typeof data?.error === "string" && data.error.startsWith("Route not found")) {
+      return NextResponse.json(
+        {
+          error:
+            "Your backend doesn't have the Problem Solving routes yet. Copy the backend/ files from the update and restart it — if API_URL points to a deployed backend, push and redeploy it.",
+          code: "BACKEND_OUTDATED",
+        },
+        { status: 503 }
+      );
+    }
     if (!res.ok) {
       return NextResponse.json(
         { error: data?.error ?? `Backend returned ${res.status}. Try again in a moment.` },

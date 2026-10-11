@@ -1,8 +1,17 @@
 // src/lib/problemSolving/codechef.ts — CodeChef has no public user API, so we
 // read the public profile page (rating, stars, solved count, rating history,
-// daily submission heatmap) and the "recent activity" endpoint it uses.
-import type { Activity, Contest, PlatformStats, RatingPoint } from "./types";
-import { UpstreamError, addDayCount, fetchJson, fetchText, verdictFromLabel } from "./server-utils";
+// daily submission heatmap, solved problem names) and the "recent activity"
+// endpoint it uses. Difficulty is looked up per problem — see classifyCodechef().
+import type { Activity, Contest, Difficulty, DifficultySplit, PlatformStats, RatingPoint } from "./types";
+import {
+  UpstreamError,
+  addDayCount,
+  ccCategoryToDifficulty,
+  ccRatingToDifficulty,
+  fetchJson,
+  fetchText,
+  verdictFromLabel,
+} from "./server-utils";
 
 const BASE = "https://www.codechef.com";
 
@@ -119,6 +128,16 @@ export async function fetchCodechef(handle: string): Promise<PlatformStats> {
     num(html.match(/Contests \((\d+)\)/)?.[1]) ??
     history.length;
 
+  // "Problems Solved" section: names grouped by contest / practice path (no codes)
+  const solvedSection = html.match(/class="rating-data-section problems-solved">([\s\S]*?)<\/section>/)?.[1] ?? "";
+  const solvedNames = [
+    ...new Set(
+      [...solvedSection.matchAll(/<span style="font-size: 12px";?>([^<]+)<\/span>/g)]
+        .map((m) => decodeEntities(m[1]).trim())
+        .filter(Boolean)
+    ),
+  ];
+
   const dayCounts: Record<string, number> = {};
   for (const d of extractJsArray<{ date: string; value: number }>(html, "userDailySubmissionsStats")) {
     if (d.date) addDayCount(dayCounts, padDate(d.date), Number(d.value) || 0);
@@ -129,7 +148,8 @@ export async function fetchCodechef(handle: string): Promise<PlatformStats> {
     handle,
     profileUrl: `${BASE}/users/${handle}`,
     solved,
-    difficulty: null, // CodeChef doesn't expose a difficulty split
+    difficulty: null, // filled in by classifyCodechef() — see aggregate.ts
+    solvedNames,
     rating,
     maxRating: maxRating ?? (history.length ? Math.max(...history.map((h) => h.rating)) : null),
     title: stars ? `${stars}★` : null,
@@ -163,4 +183,112 @@ interface CcContest {
   contest_name: string;
   contest_start_date_iso: string;
   contest_duration: string;
+}
+
+// ---------------------------------------------------------------- difficulty
+// CodeChef's profile only lists solved problem *names*. For each one we look up
+// the problem (search → code + difficulty rating; unrated problems fall back to
+// the practice category) and cache the answer for a week. CodeChef throttles
+// bursts, so lookups run at most 3 at a time; each stats request waits up to
+// `budgetMs` and anything unfinished is reported as `pending` while the lookups
+// carry on in the background, so the next request picks them up.
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
+
+const LEVEL_TTL = 7 * 24 * 60 * 60_000;
+const MAX_CONCURRENT = 3;
+const levelCache = new Map<string, { difficulty: Difficulty | null; at: number }>();
+const inflight = new Map<string, Promise<void>>();
+
+let active = 0;
+const waiting: (() => void)[] = [];
+async function limited<T>(task: () => Promise<T>): Promise<T> {
+  if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
+  active++;
+  try {
+    return await task();
+  } finally {
+    active--;
+    waiting.shift()?.();
+  }
+}
+
+interface CcSearchResult {
+  data?: { code: string; name: string; difficulty_rating: string; contest_code: string | null }[];
+}
+
+async function lookupDifficulty(name: string): Promise<Difficulty | null> {
+  const search = await limited(() =>
+    fetchJson<CcSearchResult>(`${BASE}/api/list/problems?limit=10&search=${encodeURIComponent(name)}`, {
+      timeoutMs: 10_000,
+    })
+  );
+  const wanted = name.toLowerCase();
+  const matches = (search.data ?? []).filter((p) => p.name.trim().toLowerCase() === wanted);
+  if (matches.length === 0) return null;
+
+  const rated = matches.find((p) => Number(p.difficulty_rating) > 0);
+  if (rated) return ccRatingToDifficulty(Number(rated.difficulty_rating));
+
+  // unrated (DSA / practice problems): use CodeChef's practice category instead
+  const problem = await limited(() =>
+    fetchJson<{ difficulty_rating?: string; category_name?: string }>(
+      `${BASE}/api/contests/PRACTICE/problems/${encodeURIComponent(matches[0].code)}`,
+      { timeoutMs: 10_000 }
+    )
+  );
+  return ccRatingToDifficulty(Number(problem.difficulty_rating)) ?? ccCategoryToDifficulty(problem.category_name);
+}
+
+function ensureLookup(name: string): Promise<void> | null {
+  const key = name.toLowerCase();
+  const hit = levelCache.get(key);
+  if (hit && Date.now() - hit.at < LEVEL_TTL) return null;
+  let job = inflight.get(key);
+  if (!job) {
+    job = lookupDifficulty(name)
+      .then((difficulty) => {
+        levelCache.set(key, { difficulty, at: Date.now() });
+      })
+      .catch(() => {
+        // network / throttling error: not cached, so the next request retries
+      })
+      .finally(() => inflight.delete(key));
+    inflight.set(key, job);
+  }
+  return job;
+}
+
+/** Easy/Medium/Hard split of a CodeChef user's solved problems. */
+export async function classifyCodechef(names: string[], totalSolved: number, budgetMs = 5_000): Promise<DifficultySplit> {
+  const jobs = names.map(ensureLookup).filter((j): j is Promise<void> => j !== null);
+  if (jobs.length) {
+    await Promise.race([Promise.allSettled(jobs), new Promise((resolve) => setTimeout(resolve, budgetMs))]);
+  }
+
+  const split: DifficultySplit = { easy: 0, medium: 0, hard: 0, unrated: 0, pending: 0 };
+  for (const name of names) {
+    const key = name.toLowerCase();
+    const hit = levelCache.get(key);
+    if (!hit) {
+      if (inflight.has(key)) split.pending!++;
+      else split.unrated!++; // lookup failed this time — retried on the next request
+      continue;
+    }
+    if (hit.difficulty === "Easy") split.easy++;
+    else if (hit.difficulty === "Medium") split.medium++;
+    else if (hit.difficulty === "Hard") split.hard++;
+    else split.unrated!++;
+  }
+  // the profile's total can include problems it doesn't list by name
+  split.unrated! += Math.max(0, totalSolved - names.length);
+  return split;
 }

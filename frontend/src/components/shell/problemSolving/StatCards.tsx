@@ -1,8 +1,8 @@
 // src/components/shell/problemSolving/StatCards.tsx — the four headline cards:
-// Total Solved · Contests Attended · Streak · Next Contest (live countdown).
+// Total Solved · Contests Attended (per platform) · Streak · Next Contest (live countdown).
 "use client";
 
-import { CalendarPlus, Flame, Trophy } from "lucide-react";
+import { CalendarPlus, Flame } from "lucide-react";
 import type { Contest, PlatformKey, StatsResponse } from "@/lib/problemSolving/types";
 import { cn } from "@/lib/utils";
 import { googleCalendarUrl } from "./calendar";
@@ -128,14 +128,15 @@ function TotalSolvedCard({ stats }: { stats: StatsResponse }) {
 }
 
 function ContestsCard({ stats }: { stats: StatsResponse }) {
-  const rows = PLATFORMS.filter((p) => stats.platforms[p].status === "ok" && stats.totals.contestsByPlatform[p] > 0);
+  // every connected platform gets a row — zero contests are shown (dimmed), not hidden
+  const rows = PLATFORMS.filter((p) => stats.platforms[p].status !== "missing");
   return (
     <StatCard
       label="Contests attended"
       icon={
-        <IconChip color="#a78bfa">
-          <Trophy className="size-4" />
-        </IconChip>
+        <SplitRing
+          parts={rows.map((p) => ({ value: stats.totals.contestsByPlatform[p], color: PLATFORM_META[p].color }))}
+        />
       }
     >
       <div className="flex items-baseline gap-2">
@@ -143,16 +144,37 @@ function ContestsCard({ stats }: { stats: StatsResponse }) {
         <span className="text-xs text-white/40">across all platforms</span>
       </div>
       <div className="mt-auto space-y-1.5">
-        {rows.length === 0 && <p className="text-[11px] text-white/40">No rated contests yet — time to start!</p>}
+        {rows.length === 0 && <p className="text-[11px] text-white/40">No platforms connected</p>}
         {rows.map((p) => {
-          const data = stats.platforms[p].status === "ok" ? stats.platforms[p].data : null;
+          const state = stats.platforms[p];
+          const data = state.status === "ok" ? state.data : null;
+          const count = stats.totals.contestsByPlatform[p];
+          const detail = !data
+            ? "unavailable"
+            : count === 0
+              ? "—"
+              : data.rating
+                ? `${formatNumber(data.rating)}${data.title ? ` · ${data.title}` : ""}`
+                : "";
           return (
-            <div key={p} className="flex items-center gap-2 text-[11px] text-white/45">
-              <PlatformTag platform={p} />
-              <span className="font-mono text-white/80">{stats.totals.contestsByPlatform[p]}</span>
-              <span className="ml-auto truncate font-mono">
-                {data?.rating ? `${data.rating}${data.title ? ` · ${data.title}` : ""}` : ""}
+            <div
+              key={p}
+              className={cn("flex items-center gap-1.5 text-[11px]", count > 0 ? "text-white/45" : "text-white/30")}
+              title={
+                count === 0
+                  ? `No rated contests on ${PLATFORM_META[p].label} yet`
+                  : [detail, data?.maxRating ? `max ${formatNumber(data.maxRating)}` : ""].filter(Boolean).join(" · ")
+              }
+            >
+              <span
+                className={cn("size-1.5 shrink-0 rounded-full", count === 0 && "opacity-40")}
+                style={{ backgroundColor: PLATFORM_META[p].color }}
+              />
+              <span className="w-7 shrink-0">{PLATFORM_META[p].short}</span>
+              <span className={cn("w-8 shrink-0 font-mono", count > 0 ? "text-white/80" : "text-white/30")}>
+                {formatNumber(count)}
               </span>
+              <span className="ml-auto min-w-0 truncate text-right font-mono">{detail}</span>
             </div>
           );
         })}

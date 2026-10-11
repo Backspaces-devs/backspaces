@@ -10,7 +10,7 @@
 // Handles come from LEETCODE_USERNAME / CODEFORCES_USERNAME / CODECHEF_USERNAME / GFG_USERNAME.
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, RefreshCw, AlertCircle } from "lucide-react";
 import type {
   Activity,
@@ -57,6 +57,20 @@ export function ProblemSolvingContent() {
 
   const s = stats.data;
   const syncing = stats.loading || contests.loading || potd.loading;
+
+  // CodeChef difficulty levels are classified in the background on the server;
+  // quietly re-fetch stats until they're all in (capped, in case CodeChef is down)
+  const levelsPending = s?.totals.difficulty.pending ?? 0;
+  const levelPolls = useRef(0);
+  const reloadStats = stats.reload;
+  useEffect(() => {
+    if (levelsPending === 0 || levelPolls.current >= 20) return;
+    const t = setTimeout(() => {
+      levelPolls.current += 1;
+      reloadStats();
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [levelsPending, s, reloadStats]);
 
   const sync = () => {
     stats.refresh();

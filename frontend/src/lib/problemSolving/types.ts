@@ -10,6 +10,10 @@ export interface DifficultySplit {
   easy: number;
   medium: number;
   hard: number;
+  /** Solved problems the platform gives no difficulty for (CodeChef only). */
+  unrated?: number;
+  /** Problems still being classified in the background (CodeChef only). */
+  pending?: number;
 }
 
 /** "ac" = accepted, "wa" = wrong answer, "tle"/"mle"/"re"/"ce" = other failures. */
@@ -56,6 +60,8 @@ export interface PlatformStats {
   recentAcceptedSlugs?: string[];
   /** GFG only: every solved problem slug */
   solvedSlugs?: string[];
+  /** CodeChef only (server-side, stripped from the response): solved problem names from the profile */
+  solvedNames?: string[];
 }
 
 export type PlatformState =

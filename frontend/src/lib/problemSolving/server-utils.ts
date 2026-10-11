@@ -158,6 +158,27 @@ export function cfRatingToDifficulty(rating?: number | null): Difficulty | null 
   return "Hard";
 }
 
+/**
+ * CodeChef problem difficulty rating → bucket, using CodeChef's own star bands:
+ * below 1400 (beginner, 1★) Easy · 1400–1999 (2★–4★) Medium · 2000+ (5★+) Hard.
+ */
+export function ccRatingToDifficulty(rating?: number | null): Difficulty | null {
+  if (!rating || rating <= 0) return null;
+  if (rating < 1400) return "Easy";
+  if (rating < 2000) return "Medium";
+  return "Hard";
+}
+
+/** CodeChef practice category ("school", "easy", "medium", "hard", "challenge") → bucket. */
+export function ccCategoryToDifficulty(category?: string | null): Difficulty | null {
+  const v = category?.toLowerCase().trim();
+  if (!v) return null;
+  if (v === "school" || v === "beginner" || v === "cakewalk" || v === "easy") return "Easy";
+  if (v === "medium") return "Medium";
+  if (v === "hard" || v === "challenge") return "Hard";
+  return null;
+}
+
 export function normaliseDifficulty(value?: string | null): Difficulty | null {
   const v = value?.toLowerCase();
   if (!v) return null;

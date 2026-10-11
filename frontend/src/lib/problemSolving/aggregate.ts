@@ -17,7 +17,7 @@ import type {
 } from "./types";
 import { fetchLeetCode, fetchLeetCodeContests, fetchLeetCodePotd } from "./leetcode";
 import { fetchCodeforces, fetchCodeforcesContests } from "./codeforces";
-import { fetchCodechef, fetchCodechefContests } from "./codechef";
+import { classifyCodechef, fetchCodechef, fetchCodechefContests } from "./codechef";
 import { fetchGfg, fetchGfgPotd } from "./gfg";
 import { HANDLE_ENV, cached, dayKey, errorMessage, getHandle } from "./server-utils";
 
@@ -44,6 +44,13 @@ async function loadPlatform(
     const loader =
       platform === "codeforces" ? fetchCodeforces : platform === "codechef" ? fetchCodechef : fetchGfg;
     const data = await cached(`${platform}:${handle}`, STATS_TTL, () => loader(handle), { force });
+    if (platform === "codechef") {
+      // levels come from a separate week-long per-problem cache, recomputed on every
+      // request so the split fills in as background lookups finish
+      const { solvedNames = [], ...rest } = data;
+      const difficulty = await classifyCodechef(solvedNames, data.solved);
+      return { state: { status: "ok", data: { ...rest, difficulty } } };
+    }
     return { state: { status: "ok", data } };
   } catch (err) {
     return { state: { status: "error", handle, error: errorMessage(err) } };
@@ -99,7 +106,7 @@ export async function getStats(force = false): Promise<StatsResponse> {
   const zero = () => Object.fromEntries(PLATFORMS.map((p) => [p, 0])) as Record<PlatformKey, number>;
   const byPlatform = zero();
   const contestsByPlatform = zero();
-  const difficulty: DifficultySplit = { easy: 0, medium: 0, hard: 0 };
+  const difficulty: DifficultySplit = { easy: 0, medium: 0, hard: 0, unrated: 0, pending: 0 };
   for (const s of ok) {
     byPlatform[s.platform] = s.solved;
     contestsByPlatform[s.platform] = s.contests;
@@ -107,6 +114,8 @@ export async function getStats(force = false): Promise<StatsResponse> {
       difficulty.easy += s.difficulty.easy;
       difficulty.medium += s.difficulty.medium;
       difficulty.hard += s.difficulty.hard;
+      difficulty.unrated! += s.difficulty.unrated ?? 0;
+      difficulty.pending! += s.difficulty.pending ?? 0;
     }
   }
 
